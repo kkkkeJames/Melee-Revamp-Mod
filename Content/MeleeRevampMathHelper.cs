@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace MeleeRevamp
+namespace MeleeRevamp.Content
 {
     public static class MeleeRevampMathHelper
     {
@@ -23,12 +23,12 @@ namespace MeleeRevamp
         //Helper function calculating the radius of an ellipse with its long/short radius and a rotation
         public static float EllipseRadiusHelper(float a, float b, float rot)
         {
-            return (float)Math.Sqrt(Math.Pow(a, 2) * Math.Pow(b, 2) / (Math.Pow(a, 2) * Math.Pow((Math.Sin(rot)), 2) + Math.Pow(b, 2) * Math.Pow((Math.Cos(rot)), 2)));
+            return (float)Math.Sqrt(Math.Pow(a, 2) * Math.Pow(b, 2) / (Math.Pow(a, 2) * Math.Pow(Math.Sin(rot), 2) + Math.Pow(b, 2) * Math.Pow(Math.Cos(rot), 2)));
         }
         //Helper function calculating the value of a logistic model
         public static float LogisticHelper(float a, float b, float pow, float red, float x)
         {
-            return (float)((a / (1 + ((a / b) - 1) * Math.Pow(Math.E, pow * x))) - red);
+            return (float)(a / (1 + (a / b - 1) * Math.Pow(Math.E, pow * x)) - red);
         }
     }
 }

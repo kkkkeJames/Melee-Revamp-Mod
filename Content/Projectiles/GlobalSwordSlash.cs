@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MeleeRevamp.Content.Core;
+using MeleeRevamp.Content.Particles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ParticleLibrary.Core;
+using ReLogic.Content;
+using SDL2;
+using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.GameContent;
-using ReLogic.Content;
-using Terraria.Graphics.Effects;
-using MeleeRevamp.Content.Core;
-using ParticleLibrary.Core;
-using MeleeRevamp.Content.Particles;
 
 namespace MeleeRevamp.Content.Projectiles
 {
@@ -231,7 +232,7 @@ namespace MeleeRevamp.Content.Projectiles
         public void MoveSwordBefore(Projectile proj, float timer)
         {
             GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
-            Player player = Main.player[proj.owner]; //基础设置
+            Player player = Main.player[proj.owner]; 
             projmod.TransferToSet(proj, PrepSet, timer, true, true);
             if (projmod.ApplyDissolve) DissolveRate = timer;
         }
@@ -284,7 +285,7 @@ namespace MeleeRevamp.Content.Projectiles
          * While wielding, the target angle is determined by targetrot and mouserot
          */
         // Get inputs of wield
-        public void WieldTrigger(bool shouldcountmouse, float standardscale, float thinscale, float holdrot, float targrot, float SwordPowerGaugeadd, float handlelength = 0, float stoptime = 0, float damscale = 1f, int projtype = 0, float projdamscale = 1f, bool applystuck = false, bool applyscreenshake = false)
+        public void WieldTrigger(bool shouldcountmouse, float standardscale, float thinscale, float holdrot, float targrot, float SwordPowerGaugeadd, float handlelength = 0, bool applystuck = false, bool applyscreenshake = false, float stoptime = 0, float damscale = 1f, int projtype = 0, float projdamscale = 1f)
         {
             Player player = Main.player[Projectile.owner];
             WieldDrawArmBefore = ShouldDrawArm;
@@ -421,12 +422,14 @@ namespace MeleeRevamp.Content.Projectiles
             {
                 StabStartPosAdd = new Vector2(-SwordRadius / 2, 0).RotatedBy((float)Math.Atan(MousePos.Y / MousePos.X) + exrot);
                 StabEndPosAdd = new Vector2(0, 0).RotatedBy((float)Math.Atan(MousePos.Y / MousePos.X) + exrot);
+                PrepSet.Set(StabStartPosAdd, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot - (float)Math.PI / 2, Projectile.scale);
                 TargetSet.Set(StabStartPosAdd, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
             }
             else
             {
                 StabStartPosAdd = new Vector2(-SwordRadius / 2, 0).RotatedBy(exrot);
                 StabEndPosAdd = new Vector2(0, 0).RotatedBy(exrot);
+                PrepSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, Projectile.scale);
                 TargetSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, 1.6f);
             }
             ((GlobalSwordSlash)Projectile.ModProjectile).SetState<Stab>();

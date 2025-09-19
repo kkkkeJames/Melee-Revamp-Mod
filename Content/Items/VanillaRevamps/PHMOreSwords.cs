@@ -70,7 +70,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -140,7 +140,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -210,7 +210,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -280,7 +280,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -350,7 +350,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -420,7 +420,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -490,7 +490,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }
@@ -560,7 +560,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                             ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
                             break;
                         case 2:
-                            ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, 0, 1, 0, 1.2f, true, true);
+                            ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
                             break;
                     }
                 }

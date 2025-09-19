@@ -11,6 +11,10 @@ Mods: {
 			TungstenBroadswordSlash.DisplayName: Tungsten Broadsword Slash
 			GlobalSwordLight.DisplayName: Global Sword Light
 			GlobalSwordDrive.DisplayName: Global Sword Drive
+			BladeOfGrassSlash.DisplayName: Blade Of Grass Slash
+			FlyingGrass.DisplayName: Flying Grass
+			GrassSlash.DisplayName: Grass Slash
+			BloodButchererSlash.DisplayName: Blood Butcherer Slash
 		}
 	}
 }

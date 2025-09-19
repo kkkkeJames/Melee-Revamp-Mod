@@ -1,7 +1,7 @@
 ﻿using Terraria;
 using Terraria.ModLoader;
 
-namespace MeleeRevamp
+namespace MeleeRevamp.Content
 {
     public class MeleeRevampPlayer : ModPlayer
     {
