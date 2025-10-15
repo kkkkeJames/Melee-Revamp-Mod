@@ -177,6 +177,10 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         {
             public Vector2 slashpos1;
             public Vector2 slashpos2;
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                throw new NotImplementedException();
+            }
             public override void AI(ProjectileStateMachine projectile)
             {
                 #region 基础设置

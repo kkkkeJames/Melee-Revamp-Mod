@@ -14,6 +14,7 @@ namespace MeleeRevamp.Content
     {
         public static MeleeRevamp Instance { get; set; }
         private List<IOrderedLoadable> loadCache;
+        public static ModKeybind SwitchAlternateAttack { get; private set; }
         public MeleeRevamp()
         {
             Instance = this;
@@ -38,6 +39,8 @@ namespace MeleeRevamp.Content
                 loadCache[k].Load(); //load
                 SetLoadingText("Loading " + loadCache[k].GetType().Name); //display all loaded interfaces
             }
+
+            SwitchAlternateAttack = KeybindLoader.RegisterKeybind(this, "Switch Melee weapon Alternate Attack Mode", "F"); //register keybind for switching melee alternate attacks
         }
 
         public override void Unload()

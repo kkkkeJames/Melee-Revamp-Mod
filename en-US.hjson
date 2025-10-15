@@ -15,6 +15,9 @@ Mods: {
 			FlyingGrass.DisplayName: Flying Grass
 			GrassSlash.DisplayName: Grass Slash
 			BloodButchererSlash.DisplayName: Blood Butcherer Slash
+			LightsBaneSlash.DisplayName: Lights Bane Slash
 		}
+
+		"Keybinds.Switch Melee weapon Alternate Attack Mode.DisplayName": Switch  Melee weapon  Alternate  Attack  Mode
 	}
 }

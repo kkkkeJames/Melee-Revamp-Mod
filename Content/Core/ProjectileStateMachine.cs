@@ -9,6 +9,7 @@ namespace MeleeRevamp.Content.Core
 {
     public abstract class ProjectileState // An abstract class, the state of Projectile
     {
+        public abstract void TriggerAI(ProjectileStateMachine projectile, params object[] args);
         public abstract void AI(ProjectileStateMachine projectile); // AI for ProjectileStateMachine
     }
     public abstract class ProjectileStateMachine : ModProjectile

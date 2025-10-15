@@ -7,6 +7,7 @@ using ReLogic.Content;
 using SDL2;
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -60,6 +61,8 @@ namespace MeleeRevamp.Content.Projectiles
         public bool ApplySlashDust = false; // Whether apply dust for slash
         public bool AttackHit = false; // Whether the attack had landed, which serves as immunity frame count
         public float SwordPowerGaugeAdd = 0; // the sword power an attack should add
+        public int AlternateAttackIndex = 0; // The index of the Alternate attack
+        public int AlternateAttackCount = 0; // The number of Alternate attacks
         #endregion
         #region SMVariables
         public struct PosSet // The structure of position set
@@ -227,6 +230,9 @@ namespace MeleeRevamp.Content.Projectiles
             Projectile.CritChance = player.HeldItem.crit; // Crit = Item crit
             Projectile.knockBack = player.HeldItem.knockBack; // knockback = Item knockback
             Projectile.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
+
+            if (MeleeRevamp.SwitchAlternateAttack.JustPressed) // Switch Alternate Attack mode even before AI
+                AlternateAttackIndex = AlternateAttackCount == 0 ? 0 : (AlternateAttackIndex + 1) % AlternateAttackCount;
         }
         // Transfer the projectile to the preperation set, which is set seperately
         public void MoveSwordBefore(Projectile proj, float timer)
@@ -240,6 +246,10 @@ namespace MeleeRevamp.Content.Projectiles
         public bool IdleState = false;
         public class Idle : ProjectileState
         {
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                throw new NotImplementedException();
+            }
             public override void AI(ProjectileStateMachine projectile)
             {
                 #region Variables
@@ -329,8 +339,12 @@ namespace MeleeRevamp.Content.Projectiles
             ApplyScreenShake = applyscreenshake;
             SwordPowerGaugeAdd = SwordPowerGaugeadd;
         }
-        private class Wield : ProjectileState
+        public class Wield : ProjectileState
         {
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                throw new NotImplementedException();
+            }
             public override void AI(ProjectileStateMachine projectile)
             {
                 #region Basic settings
@@ -390,7 +404,7 @@ namespace MeleeRevamp.Content.Projectiles
                     if (projmod.Timer >= projmod.TimeMax)
                     {
                         projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
-                        projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.2f);
+                        projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
                         projmod.Timer = 0; 
                         projmod.TimeMax = 240; 
                         projmod.SetState<Recover>(); 
@@ -438,8 +452,12 @@ namespace MeleeRevamp.Content.Projectiles
             SwordPowerGaugeAdd = SwordPowerGaugeadd;
             DamageScale = damscale;
         }
-        private class Stab : ProjectileState
+        public class Stab : ProjectileState
         {
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                throw new NotImplementedException();
+            }
             public override void AI(ProjectileStateMachine projectile)
             {
                 #region Basic settings
@@ -490,15 +508,14 @@ namespace MeleeRevamp.Content.Projectiles
                 }
                 #endregion
                 #region Switch state
-                if (projmod.Timer > projmod.TimeMax) 
+                if (projmod.Timer >= projmod.TimeMax) 
                 {
                     projmod.StabAttackStopDraw = false;
                     projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
-                    projmod.TargetSet.Set(new Vector2(-4 * player.direction, -4), 0.5f * (float)Math.PI - 1.2f * player.direction, 0, 1.2f);
+                    projmod.TargetSet.Set(new Vector2(-4 * player.direction, -4), 0.5f * (float)Math.PI - 1.2f * player.direction, 0, 1.6f);
                     projmod.Timer = 0; 
                     projmod.TimeMax = 240; 
                     projmod.SetState<Recover>(); 
-                    return;
                 }
                 #endregion
             }
@@ -509,6 +526,10 @@ namespace MeleeRevamp.Content.Projectiles
         */
         public class Recover : ProjectileState
         {
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                throw new NotImplementedException();
+            }
             public override void AI(ProjectileStateMachine projectile)
             {
                 Projectile proj = projectile.Projectile;
