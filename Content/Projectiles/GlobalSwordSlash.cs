@@ -1,5 +1,6 @@
 ﻿using MeleeRevamp.Content.Core;
 using MeleeRevamp.Content.Particles;
+using Microsoft.Build.Execution;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ParticleLibrary.Core;
@@ -14,6 +15,7 @@ using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
+using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 
 namespace MeleeRevamp.Content.Projectiles
 {
@@ -46,7 +48,7 @@ namespace MeleeRevamp.Content.Projectiles
         public Texture2D SwordTexture; // Sword Texture
         public bool SwordOwnTexture = false; // Whether to use the item texture or other textures
         public Item ShouldHeldItem; // The item player should hold
-        public bool DrawInverse = false; // Whether to draw the sword inversely
+        public bool FlipSwordTexture = false; // Whether to draw the sword inversely
         public float SwordRadius; // Calculate the radius of sword
         public Vector2 ArmToSwordOffset; // The vector from arm to sword
         public bool ShouldDrawArm; // Whether the arm of player is provided by code
@@ -92,6 +94,12 @@ namespace MeleeRevamp.Content.Projectiles
         public bool ShouldCountMouse = true; // Whether it should consider
         public Vector2 MousePos; // The position of mouse
         public bool CouldHit = false; // Whether the projectile could hit
+        public float ComboTimer = 0; // The timer for recovery in Recover state, within a few time, landing another attack will continue the combo
+        public bool isCombo = false; // Whether to incremenet recovery timer
+        public int ComboCount = 0; // The count of combo, reset when player stop attacking for a while
+        public int MaxComboCount = 0; // The max count of combo
+        public bool LeftClick = false; // Detect left click input
+        public bool RightClick = false; // Detect right click input
         #endregion
         #region DrawVariables
         public bool ApplyDissolve; //Whether apply disoolve shader while drawing
@@ -151,7 +159,7 @@ namespace MeleeRevamp.Content.Projectiles
             projmod.ArmToSwordOffset = new Vector2(MathHelper.Lerp(projmod.IniSet.SwordArmAdd.X, InputSet.SwordArmAdd.X, timer), MathHelper.Lerp(projmod.IniSet.SwordArmAdd.Y, InputSet.SwordArmAdd.Y, timer));
             proj.scale = MathHelper.Lerp(projmod.IniSet.Scale, InputSet.Scale, timer);
             projmod.ArmRotation = MathHelper.Lerp(projmod.IniSet.ArmRot, InputSet.ArmRot, timer);
-            // Brute-forcely calcualte the rotation of arm and sword, taking its arm rotation and the range of angles in degrees into consideration
+            // Brute force to calcualte the rotation of arm and sword, taking its arm rotation and the range of angles in degrees into consideration
             if (shortestrot)
             {
                 while (projmod.IniSet.SwordRot - InputSet.SwordRot >= Math.PI * 2)
@@ -233,6 +241,13 @@ namespace MeleeRevamp.Content.Projectiles
 
             if (MeleeRevamp.SwitchAlternateAttack.JustPressed) // Switch Alternate Attack mode even before AI
                 AlternateAttackIndex = AlternateAttackCount == 0 ? 0 : (AlternateAttackIndex + 1) % AlternateAttackCount;
+
+            if (Main.mouseLeft && !Main.mouseLeftRelease && player.itemTime <= 0 && player.itemAnimation <= 0)
+                LeftClick = true;
+            else LeftClick = false;
+            if (Main.mouseRight && !Main.mouseRightRelease && player.itemTime <= 0 && player.itemAnimation <= 0)
+                RightClick = true;
+            else RightClick = false;
         }
         // Transfer the projectile to the preperation set, which is set seperately
         public void MoveSwordBefore(Projectile proj, float timer)
@@ -248,7 +263,7 @@ namespace MeleeRevamp.Content.Projectiles
         {
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
-                throw new NotImplementedException();
+                return;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -269,81 +284,95 @@ namespace MeleeRevamp.Content.Projectiles
                 projmod.DrawBehindPlayer = true; // Draw sword behind player
                 #endregion
                 #region Variables related to player direction
-                if (player.direction == -1) projmod.DrawInverse = true;
-                else projmod.DrawInverse = false;
+                if (player.direction == -1) projmod.FlipSwordTexture = true;
+                else projmod.FlipSwordTexture = false;
                 projmod.ArmToSwordOffset = new Vector2(0, 12);
                 projmod.ArmRotation = 0;
                 #endregion
             }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                throw new NotImplementedException();
+            }
         }
         #region Wield variables
-        public float WieldStandardScale; // The long radius' scale for ellipse
-        public float WieldThinScale; // The ratio between the short and long radius of ellipse
-        public float WieldHoldRot; // The hold rot
-        public float WieldFinalRot; // The final rot
         public float[] WieldDrawRadius = new float[10001]; // The cache for storing past radii, used as inputs for vertex paint
-        public bool WieldDrawArmBefore; // Whether it should draw arm before
         public bool WieldAttack = false; // Whether draw slash
         public int WieldStuckTimer = 0; // Timer of stuck frames
         public int WieldStopTime; // Time to stop attack
         public float WieldHandleLength; // The length of handle for wield
         public float WieldDrawLessLength = 0; // Distance from vertex paint to sword
         #endregion
-        /*
-         * State: Wield
-         * In the first few frames, hold the sword, the position is determined by special Holdset.rot
-         * While wielding, the target angle is determined by targetrot and mouserot
-         */
-        // Get inputs of wield
-        public void WieldTrigger(bool shouldcountmouse, float standardscale, float thinscale, float holdrot, float targrot, float SwordPowerGaugeadd, float handlelength = 0, bool applystuck = false, bool applyscreenshake = false, float stoptime = 0, float damscale = 1f, int projtype = 0, float projdamscale = 1f)
-        {
-            Player player = Main.player[Projectile.owner];
-            WieldDrawArmBefore = ShouldDrawArm;
-            Timer = 0; // Reset timer
-            IniSet.Set(ArmToSwordOffset, Projectile.rotation, ArmRotation, Projectile.scale); // Get iniset
-            ShouldCountMouse = shouldcountmouse; // Should this wield count mouse angle into consideration
-            if (shouldcountmouse) MousePos = Main.MouseWorld - player.Center; // If yes, get mouse rotation
-            WieldHoldRot = holdrot; // Get the final angle of hold
-            WieldFinalRot = targrot; // Get the final angle of wielding
-            DrawInverse = player.direction < 0 ? true : false; // Change direction of projectile draw based on player direction
-            if (targrot < holdrot) DrawInverse = !DrawInverse; 
-            if (player.direction < 0) 
-            {
-                WieldHoldRot = (float)Math.PI - WieldHoldRot; // If player's direction is left, change hold rot and final rot based on them
-                WieldFinalRot = (float)Math.PI - WieldFinalRot;
-            }
-            float scl = MeleeRevampMathHelper.EllipseRadiusHelper(standardscale, standardscale * thinscale, WieldHoldRot);
-            if (shouldcountmouse) // Take mouse into consideration
-            {
-                WieldHoldRot += (float)Math.Atan(MousePos.Y / MousePos.X);
-                WieldFinalRot += (float)Math.Atan(MousePos.Y / MousePos.X);
-            }
-            WieldStandardScale = standardscale; // Change radius issue
-            WieldThinScale = thinscale;
-            WieldHandleLength = handlelength;
-            PrepSet.Set(new Vector2(-WieldHandleLength, 0).RotatedBy(WieldHoldRot), WieldHoldRot, WieldHoldRot - (float)Math.PI / 2f, scl);
-            // Calculate the final rotation by all those inputs with the ellipse radius helper
-            int targscaleflag = ShouldCountMouse ? 1 : 0;
-            float targscale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, WieldFinalRot - (float)Math.Atan(MousePos.Y / MousePos.X) * targscaleflag);
-            TargetSet.Set(Vector2.Zero, WieldFinalRot, WieldFinalRot - (float)Math.PI / 2, targscale); // Set the targetset
-            ((GlobalSwordSlash)Projectile.ModProjectile).SetState<Wield>();
-            if (!DrawSword)
-            {
-                DrawSword = true;
-                ApplyDissolve = true;
-            }
-            DamageScale = damscale;
-            ShootProj = projtype;
-            ApplyStuck = applystuck;
-            ApplySlashDust = true;
-            ApplyScreenShake = applyscreenshake;
-            SwordPowerGaugeAdd = SwordPowerGaugeadd;
-        }
         public class Wield : ProjectileState
         {
+            #region Wield state variables
+            public float WieldStandardScale; // The long radius' scale for ellipse
+            public float WieldThinScale; // The ratio between the short and long radius of ellipse
+            public float WieldHoldRot; // The hold rot
+            public float WieldFinalRot; // The final rot
+            public bool WieldCombo; // Whether start the combo recovery timer after this wield
+            #endregion
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
-                throw new NotImplementedException();
+                if (args.Length < 6)
+                    throw new Exception ("Not enough arguments for switching to Wield state.");
+                bool countMouseAngle = (bool)args[0];
+                float longRadius = (float)args[1];
+                float shortRadiusScale = (float)args[2];
+                float startAngle = (float)args[3];
+                float endAngle = (float)args[4];
+                float SPGaugeAdd = (float)args[5];
+                bool wieldCombo = args.Length >= 7 ? (bool) args[6] : true;
+                float handleLength = args.Length >= 8 ? (float)args[7] : 0f;
+                bool applyStuckVisual = args.Length >= 9 ? (bool)args[8] : false;
+                bool applyScreenShake = args.Length >= 10 ? (bool)args[9] : false;
+                float stopRotTime = args.Length >= 11 ? (float)args[10] : 0f;
+                float damageScale = args.Length >= 12 ? (float)args[11] : 1f;
+
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                player.direction = (Main.MouseWorld - player.Center).X >= 0 ? 1 : -1; // Change player direction based on mouse position
+                WieldCombo = wieldCombo;
+                projectile.Timer = 0; // Reset timer
+                projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale); // Get iniset
+                projmod.ShouldCountMouse = countMouseAngle; // Should this wield count mouse angle into consideration
+                if (countMouseAngle) projmod.MousePos = Main.MouseWorld - player.Center; // If yes, get mouse rotation
+                WieldHoldRot = startAngle; // Get the final angle of hold
+                WieldFinalRot = endAngle; // Get the final angle of wielding
+                projmod.FlipSwordTexture = player.direction < 0 ? true : false; // Change direction of projectile draw based on player direction
+                if (endAngle < startAngle) projmod.FlipSwordTexture = !projmod.FlipSwordTexture;
+                if (player.direction < 0)
+                {
+                    WieldHoldRot = (float)Math.PI - WieldHoldRot; // If player's direction is left, change hold rot and final rot based on them
+                    WieldFinalRot = (float)Math.PI - WieldFinalRot;
+                }
+                float scl = MeleeRevampMathHelper.EllipseRadiusHelper(longRadius, longRadius * shortRadiusScale, WieldHoldRot);
+                if (countMouseAngle) // Take mouse into consideration
+                {
+                    WieldHoldRot += (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X);
+                    WieldFinalRot += (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X);
+                }
+                WieldStandardScale = longRadius; // Change radius issue
+                WieldThinScale = shortRadiusScale;
+                projmod.WieldHandleLength = handleLength;
+                projmod.PrepSet.Set(new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(WieldHoldRot), WieldHoldRot, WieldHoldRot - (float)Math.PI / 2f, scl);
+                // Calculate the final rotation by all those inputs with the ellipse radius helper
+                int targscaleflag = projmod.ShouldCountMouse ? 1 : 0;
+                float targscale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, WieldFinalRot - (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) * targscaleflag);
+                projmod.TargetSet.Set(Vector2.Zero, WieldFinalRot, WieldFinalRot - (float)Math.PI / 2, targscale); // Set the targetset
+                if (!projmod.DrawSword)
+                {
+                    projmod.DrawSword = true;
+                    projmod.ApplyDissolve = true;
+                }
+                projmod.DamageScale = damageScale;
+                projmod.ApplyStuck = applyStuckVisual;
+                projmod.ApplySlashDust = true;
+                projmod.ApplyScreenShake = applyScreenShake;
+                projmod.SwordPowerGaugeAdd = SPGaugeAdd;
+                projmod.isCombo = false;
+                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -353,7 +382,6 @@ namespace MeleeRevamp.Content.Projectiles
                 Player player = Main.player[proj.owner];
                 projmod.ShouldDrawArm = true; // Player's arm angle is determined by code
                 player.itemAnimation = player.itemTime = 2; // The player is always in using weapon state
-                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4; 
                 int HoldupTimeMax = 24; // The time player hold up the sword, which is 6f in this case
                 int WieldTimeMax = (int)projmod.TimeMax - HoldupTimeMax; // The time player wield the sword
                 if (projmod.WieldStuckTimer > 0) // Modify stuck frames
@@ -379,16 +407,9 @@ namespace MeleeRevamp.Content.Projectiles
                     #region Modify angle, radius, etc.
                     projmod.RotSetTargetLogistic(proj, projmod.TargetSet, projmod.Timer - HoldupTimeMax, (float)(projmod.TimeMax - HoldupTimeMax)); // Use logistics function to determine rotation of projectile
                     projmod.ArmToSwordOffset = new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(proj.rotation); // Modify the player's arm rotation
-                    proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(projmod.WieldStandardScale, projmod.WieldStandardScale * projmod.WieldThinScale, projmod.Projectile.rotation - (projmod.ShouldCountMouse ? (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) : 0)); // Change sword's scale
+                    proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, projmod.Projectile.rotation - (projmod.ShouldCountMouse ? (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) : 0)); // Change sword's scale
                     projmod.ArmRotation = proj.rotation - (float)Math.PI / 2; // The arm moves with the sword
                     projmod.WieldDrawRadius[WieldTimer] = projmod.SwordRadius; 
-                    #endregion
-                    #region If there are any projectile that it should shoot
-                    if (projmod.ShootProj != 0 && projmod.Timer == HoldupTimeMax + WieldTimeMax / 4)
-                    {
-                        Projectile shootproj = Projectile.NewProjectileDirect(proj.GetSource_FromThis(), player.Center, Vector2.Zero, projmod.ShootProj, (int)(proj.damage * projmod.ShootProjDamScale), proj.knockBack, Main.myPlayer);
-                        shootproj.direction = player.direction;
-                    }
                     #endregion
                     #region (Not Implemented) Deflect projectiles
                     if (projmod.Timer >= -12 + HoldupTimeMax + WieldTimeMax / 4 && projmod.Timer <= 12 + HoldupTimeMax + WieldTimeMax / 4)
@@ -403,60 +424,73 @@ namespace MeleeRevamp.Content.Projectiles
                     #region Switch states
                     if (projmod.Timer >= projmod.TimeMax)
                     {
-                        projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
-                        projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
-                        projmod.Timer = 0; 
-                        projmod.TimeMax = 240; 
-                        projmod.SetState<Recover>(); 
-                        return;
+                        SwitchState(projectile);
                     }
                     #endregion
                 }
                 #endregion
             }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
+                projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
+                projmod.Timer = 0;
+                projmod.TimeMax = 240;
+                projmod.isCombo = WieldCombo;
+                projmod.ComboCount = (projmod.ComboCount + (WieldCombo ? 1 : 0)) % projmod.MaxComboCount;
+                projmod.SetState<Recover>();
+            }
         }
         public bool StabAttack = false; 
         public bool StabAttackStopDraw = false; 
-        public bool StabDrawArmBefore;
-        public Vector2 StabStartPosAdd;
-        public Vector2 StabEndPosAdd;
         /*
          * State: Stab
          * Structure is similar to wield, but more time based as their attack ways are totally different
          */
-        public void StabTrigger(bool shouldcountmouse, float SwordPowerGaugeadd, float damscale = 1f)
-        {
-            Player player = Main.player[Projectile.owner];
-            StabDrawArmBefore = ShouldDrawArm;
-            Timer = 0;
-            IniSet.Set(ArmToSwordOffset, Projectile.rotation, ArmRotation, Projectile.scale);
-            MousePos = Main.MouseWorld - player.Center;
-            float exrot = MousePos.X > 0 ? 0 : (float)Math.PI;
-            if (shouldcountmouse)
-            {
-                StabStartPosAdd = new Vector2(-SwordRadius / 2, 0).RotatedBy((float)Math.Atan(MousePos.Y / MousePos.X) + exrot);
-                StabEndPosAdd = new Vector2(0, 0).RotatedBy((float)Math.Atan(MousePos.Y / MousePos.X) + exrot);
-                PrepSet.Set(StabStartPosAdd, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot - (float)Math.PI / 2, Projectile.scale);
-                TargetSet.Set(StabStartPosAdd, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot, (float)Math.Atan(MousePos.Y / MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
-            }
-            else
-            {
-                StabStartPosAdd = new Vector2(-SwordRadius / 2, 0).RotatedBy(exrot);
-                StabEndPosAdd = new Vector2(0, 0).RotatedBy(exrot);
-                PrepSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, Projectile.scale);
-                TargetSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, 1.6f);
-            }
-            ((GlobalSwordSlash)Projectile.ModProjectile).SetState<Stab>();
-            ApplyStuck = true;
-            ApplySlashDust = true;
-            SwordPowerGaugeAdd = SwordPowerGaugeadd;
-            DamageScale = damscale;
-        }
         public class Stab : ProjectileState
         {
+            public Vector2 StabStartPosAdd;
+            public Vector2 StabEndPosAdd;
+            public bool StabCombo; // Whether start the combo recovery timer after this stab
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
-                throw new NotImplementedException();
+                if (args.Length < 2)
+                    throw new Exception("Not enough arguments for switching to Stab state.");
+                bool countMouseAngle = (bool)args[0];
+                float SPGaugeAdd = (float)args[1];
+                bool stabCombo = args.Length >= 3 ? (bool)args[2] : true;
+                float damageScale = args.Length >= 4 ? (float)args[3] : 1f;
+                StabCombo = stabCombo;
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                player.direction = (Main.MouseWorld - player.Center).X >= 0 ? 1 : -1; // Change player direction based on mouse position
+                projmod.Timer = 0;
+                projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
+                projmod.MousePos = Main.MouseWorld - player.Center;
+                float exrot = projmod.MousePos.X > 0 ? 0 : (float)Math.PI;
+                if (countMouseAngle)
+                {
+                    StabStartPosAdd = new Vector2(-projmod.SwordRadius / 2, 0).RotatedBy((float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot);
+                    StabEndPosAdd = new Vector2(0, 0).RotatedBy((float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot);
+                    projmod.PrepSet.Set(StabStartPosAdd, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
+                    projmod.TargetSet.Set(StabStartPosAdd, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
+                }
+                else
+                {
+                    StabStartPosAdd = new Vector2(-projmod.SwordRadius / 2, 0).RotatedBy(exrot);
+                    StabEndPosAdd = new Vector2(0, 0).RotatedBy(exrot);
+                    projmod.PrepSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, 1.6f);
+                    projmod.TargetSet.Set(StabStartPosAdd, exrot, exrot - (float)Math.PI / 2, 1.6f);
+                }
+                projmod.ApplyStuck = true;
+                projmod.ApplySlashDust = true;
+                projmod.SwordPowerGaugeAdd = SPGaugeAdd;
+                projmod.DamageScale = SPGaugeAdd;
+                projmod.isCombo = false;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -487,7 +521,7 @@ namespace MeleeRevamp.Content.Projectiles
                     if (projmod.Timer == HoldupTimeMax + 1)
                     {
                         projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale); 
-                        projmod.TargetSet.Set(projmod.StabEndPosAdd, proj.rotation, projmod.ArmRotation, proj.scale);
+                        projmod.TargetSet.Set(StabEndPosAdd, proj.rotation, projmod.ArmRotation, proj.scale);
                     }
                     projmod.TransferToSet(proj, projmod.TargetSet, (projmod.Timer - HoldupTimeMax) / (float)StabTimeMax);
                 }
@@ -502,22 +536,30 @@ namespace MeleeRevamp.Content.Projectiles
                     if (projmod.Timer == HoldupTimeMax + StabTimeMax + 1)
                     {
                         projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale); 
-                        projmod.TargetSet.Set(projmod.StabStartPosAdd, proj.rotation, projmod.ArmRotation, proj.scale);
+                        projmod.TargetSet.Set(StabStartPosAdd, proj.rotation, projmod.ArmRotation, proj.scale);
                     }
                     projmod.TransferToSet(proj, projmod.TargetSet, (projmod.Timer - HoldupTimeMax - StabTimeMax) / (float)RecoverTimeMax);
                 }
                 #endregion
                 #region Switch state
-                if (projmod.Timer >= projmod.TimeMax) 
+                if (projmod.Timer >= projmod.TimeMax)
                 {
-                    projmod.StabAttackStopDraw = false;
-                    projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
-                    projmod.TargetSet.Set(new Vector2(-4 * player.direction, -4), 0.5f * (float)Math.PI - 1.2f * player.direction, 0, 1.6f);
-                    projmod.Timer = 0; 
-                    projmod.TimeMax = 240; 
-                    projmod.SetState<Recover>(); 
+                    SwitchState(projectile);
                 }
                 #endregion
+            }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
+                projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
+                projmod.Timer = 0;
+                projmod.TimeMax = 240;
+                projmod.isCombo = StabCombo;
+                projmod.ComboCount = (projmod.ComboCount + (StabCombo ? 1 : 0)) % projmod.MaxComboCount;
+                projmod.SetState<Recover>();
             }
         }
         /* State : Recover
@@ -528,7 +570,7 @@ namespace MeleeRevamp.Content.Projectiles
         {
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
-                throw new NotImplementedException();
+                return;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -557,7 +599,7 @@ namespace MeleeRevamp.Content.Projectiles
                 else if (projmod.Timer > projmod.TimeMax * 2 / 5)
                 {
                     proj.rotation = player.direction < 0 ? 0.9f * (float)Math.PI : 0.1f * (float)Math.PI;
-                    projmod.DrawInverse = player.direction < 0;
+                    projmod.FlipSwordTexture = player.direction < 0;
                 }
                 // Apply dissolve
                 if (projmod.Timer > projmod.TimeMax * 4 / 5)
@@ -574,6 +616,10 @@ namespace MeleeRevamp.Content.Projectiles
                 }
                 #endregion
             }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override void AIAfter()
@@ -581,6 +627,16 @@ namespace MeleeRevamp.Content.Projectiles
             Player player = Main.player[Projectile.owner];
             Projectile.Center = player.Center + new Vector2(-4 * player.direction, -2) + new Vector2(0, 12).RotatedBy(ArmRotation) + ArmToSwordOffset + new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation); //表现为当剑和手臂的距离为0时剑刚好拿在手上
             if (ShouldDrawArm) player.SetCompositeArmFront(true, 0, ArmRotation - player.fullRotation);
+            if (isCombo)
+                ComboTimer++;
+            else ComboTimer = 0;
+            if (ComboTimer >= 60) // After 1s of recovery, reset ComboCount so the player ends a combo
+            {
+                ComboTimer = 0;
+                isCombo = false;
+                ComboCount = 0;
+            }
+            //Main.NewText(ComboCount+ " " +ComboTimer);
         }
         // Adjust the projectile hitbox. As the sword projectile does not have an appropriate hitbox, we build one through functions
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox) 
@@ -722,8 +778,8 @@ namespace MeleeRevamp.Content.Projectiles
                     ChargeEffect.ChargeBorder.CurrentTechnique.Passes[0].Apply();
                 }
                 Rectangle rect = new Rectangle(0, 0, SwordTexture.Width, SwordTexture.Height);
-                float anglefix = !DrawInverse ? 0 : (float)(0.5 * Math.PI);
-                SpriteEffects effects = !DrawInverse ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                float anglefix = !FlipSwordTexture ? 0 : (float)(0.5 * Math.PI);
+                SpriteEffects effects = !FlipSwordTexture ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
                 // Set up all variables for entityspritedraw while applying a 45 degrees rotation, as most sword item sprites has a 45 degree counter clockwise pose
                 Main.EntitySpriteDraw(SwordTexture, Projectile.Center - Main.screenPosition, rect, lightColor,
                 Projectile.rotation + anglefix + (float)Math.Atan((float)SwordTexture.Height / (float)SwordTexture.Width),

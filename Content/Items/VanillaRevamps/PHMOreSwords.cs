@@ -8,11 +8,8 @@ using MeleeRevamp.Content.Projectiles;
 
 namespace MeleeRevamp.Content.Items.VanillaRevamps
 {
-    public class CopperBroadSwordRE : GlobalItem
+    public class CopperBroadSwordRevamp : GlobalItem
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -23,7 +20,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<CopperBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<CopperBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -31,58 +28,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<CopperBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<CopperBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true)
-            {
-                timer++;
-                if (timer >= 60)
-                {
-                    normalend = false;
-                }
-            }
-            else timer = 0;
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<CopperBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<CopperBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0;
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<CopperBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((CopperBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class TinBroadSwordRE : GlobalItem
+    public class CopperBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.CopperBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Copper;
+            SlashColor = new Color(235, 166, 135);
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class TinBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -93,7 +82,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<TinBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<TinBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -101,58 +90,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<TinBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TinBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true) 
-            {
-                timer++; 
-                if (timer >= 60) 
-                {
-                    normalend = false;
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<TinBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TinBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0;
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<TinBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((TinBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class IronBroadSwordRE : GlobalItem
+    public class TinBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.TinBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Tin;
+            SlashColor = new Color(187, 165, 124);
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class IronBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -163,7 +144,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<IronBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<IronBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -171,58 +152,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<IronBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<IronBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true)
-            {
-                timer++; 
-                if (timer >= 60)
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<IronBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<IronBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<IronBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((IronBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class LeadBroadSwordRE : GlobalItem
+    public class IronBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.IronBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Iron;
+            SlashColor = new Color(189, 159, 139);
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class LeadBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -233,7 +206,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<LeadBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<LeadBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -241,58 +214,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<LeadBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<LeadBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true) 
-            {
-                timer++;
-                if (timer >= 60) 
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<LeadBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<LeadBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<LeadBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((LeadBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class SilverBroadSwordRE : GlobalItem
+    public class LeadBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.LeadBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Lead;
+            SlashColor = new Color(104, 140, 150) * 1.5f;
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class SilverBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -303,7 +268,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<SilverBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<SilverBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -311,58 +276,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<SilverBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<SilverBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true) 
-            {
-                timer++;
-                if (timer >= 60) 
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<SilverBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<SilverBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<SilverBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((SilverBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class TungstenBroadSwordRE : GlobalItem
+    public class SilverBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.SilverBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Silver;
+            SlashColor = Color.Silver;
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class TungstenBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -373,7 +330,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<TungstenBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<TungstenBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -381,58 +338,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<TungstenBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TungstenBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true)
-            {
-                timer++; 
-                if (timer >= 60) 
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<TungstenBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TungstenBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<TungstenBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((TungstenBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class GoldBroadSwordRE : GlobalItem
+    public class TungstenBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.TungstenBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Tungsten;
+            SlashColor = Color.LightGreen;
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class GoldBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -443,7 +392,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<GoldBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<GoldBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -451,58 +400,50 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<GoldBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<GoldBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true) 
-            {
-                timer++; 
-                if (timer >= 60) 
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0;
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<GoldBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<GoldBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++; 
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0; 
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<GoldBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((GoldBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-    public class PlatinumBroadSwordRE : GlobalItem
+    public class GoldBroadSwordSlash : GlobalSwordSlash
     {
-        public bool normalend = false;
-        public int phase = 0;
-        public float timer;
+        public override string Texture => "Terraria/Images/Item_" + ItemID.GoldBroadsword;
+        public override void RegisterVariables()
+        {
+            SwordDust1 = DustID.Gold;
+            SlashColor = Color.Gold;
+            MaxComboCount = 3;
+        }
+        public override void Appear()
+        {
+
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
+        }
+    }
+    public class PlatinumBroadSwordRevamp : GlobalItem
+    {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -513,7 +454,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<PlatinumBroadswordSlash>();
+            item.shoot = ModContent.ProjectileType<PlatinumBroadSwordSlash>();
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
@@ -521,156 +462,46 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void HoldItem(Item item, Player player)
         {
             player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<PlatinumBroadswordSlash>()] < 1)
-                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<PlatinumBroadswordSlash>(), item.damage, item.knockBack, player.whoAmI);
-            if (normalend == true)
-            {
-                timer++; 
-                if (timer >= 60) 
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0; 
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<PlatinumBroadSwordSlash>()] < 1)
+                Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<PlatinumBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool CanUseItem(Item item, Player player)
         {
-            timer = 0;
-            if (normalend)
-            {
-                phase++;
-                if (phase == 3)
-                    phase = 0; 
-            }
-            else
-            {
-                phase = 0;
-            }
-            normalend = true;
-            foreach (Projectile proj in Main.projectile)
-            {
-                if (proj.type == ModContent.ProjectileType<PlatinumBroadswordSlash>() && proj.owner == player.whoAmI && proj != null)
-                {
-                    switch (phase)
-                    {
-                        case 0:
-                            ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -1.9f, 1.9f, 0.2f, 6);
-                            break;
-                        case 1:
-                            ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.8f, 1.8f, -1.7f, 0.2f, 6);
-                            break;
-                        case 2:
-                            ((PlatinumBroadswordSlash)proj.ModProjectile).WieldTrigger(true, 2f * item.scale, 0.7f, -2.5f, 2.3f, -0.4f, 6, true, true, 0, 1.2f);
-                            break;
-                    }
-                }
-            }
             return false;
         }
     }
-
-    public class CopperBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.CopperBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Copper;
-            SlashColor = new Color(235, 166, 135);
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class TinBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.TinBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Tin;
-            SlashColor = new Color(187, 165, 124);
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class IronBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.IronBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Iron;
-            SlashColor = new Color(189, 159, 139);
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class LeadBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.LeadBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Lead;
-            SlashColor = new Color(104, 140, 150) * 1.5f;
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class SilverBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.SilverBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Silver;
-            SlashColor = Color.Silver;
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class TungstenBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.TungstenBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Tungsten;
-            SlashColor = Color.LightGreen;
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class GoldBroadswordSlash : GlobalSwordSlash
-    {
-        public override string Texture => "Terraria/Images/Item_" + ItemID.GoldBroadsword;
-        public override void RegisterVariables()
-        {
-            SwordDust1 = DustID.Gold;
-            SlashColor = Color.Gold;
-        }
-        public override void Appear()
-        {
-
-        }
-    }
-    public class PlatinumBroadswordSlash : GlobalSwordSlash
+    public class PlatinumBroadSwordSlash : GlobalSwordSlash
     {
         public override string Texture => "Terraria/Images/Item_" + ItemID.PlatinumBroadsword;
         public override void RegisterVariables()
         {
             SwordDust1 = DustID.Platinum;
             SlashColor = Color.Silver * 1.5f;
+            MaxComboCount = 3;
         }
         public override void Appear()
         {
 
+        }
+        public override void AIBefore()
+        {
+            base.AIBefore();
+            Player player = Main.player[Projectile.owner];
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -1.9f, 1.9f, 0.2f, true, 6f);
+                        break;
+                    case 1:
+                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, true, 6f);
+                        break;
+                    case 2:
+                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, true, 6f, true, true, 0f, 1.2f);
+                        break;
+                }
+            }
         }
     }
 }
