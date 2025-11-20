@@ -78,34 +78,34 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 switch (ComboCount)
                 {
                     case 0:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.7f, -2f, 1.9f, 0.2f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.7f, -2f, 1.9f, 0.2f, 0f, true, 6f);
                         break;
                     case 1:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.6f, 2f, -2f, 0.2f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.6f, 2f, -2f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
                         ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Stab>(true, 0.2f);
                         break;
                     case 3:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.8f, -2.2f, 2.1f, 0.2f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.8f, -2.2f, 2.1f, 0.2f, 0f, true, 6f);
                         break;
                 }
             }
-            if (RightClick)
+            if (RightClick && player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge >= 0.6f)
             {
                 switch (ComboCount)
                 {
                     case 0:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt1Combo1>(false, 1.7f, 0.9f, -2.2f, 2.2f, -0.6f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt1Combo1>(false, 1.7f, 0.9f, -2.2f, 2.2f, 0f, 0.6f, true, 6f);
                         break;
                     case 1:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt2Combo1>(false, 1.7f, 0.7f, 1.5f, -1.7f, -0.6f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt2Combo1>(false, 1.7f, 0.7f, 1.5f, -1.7f, 0f, 0.6f, true, 6f);
                         break;
                     case 2:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt3Combo1>(false, 1.7f, 0.8f, 1.8f, -1.8f, -0.6f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt3Combo1>(false, 1.7f, 0.8f, 1.8f, -1.8f, 0f, 0.6f, true, 6f);
                         break;
                     case 3:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt4Combo1>(false, 1.7f, 0.3f, -1.8f, 1.5f, -0.6f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Alt4Combo1>(false, 1.7f, 0.3f, -1.8f, 1.5f, 0f, 0.6f, true, 6f);
                         break;
                 }
             }
@@ -143,7 +143,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.SetState<Alt2Combo2>(false, 2f, 0.36f, -1.6f, 1.7f, 0f, true, 6f);
+                projmod.SetState<Alt2Combo2>(false, 2f, 0.36f, -1.6f, 1.7f, 0f, 0f, true, 6f);
             }
         }
         private class Alt2Combo2 : Wield
@@ -165,7 +165,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 3.6f;
+                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 3.2f;
                 player.velocity.Y -= 10f;
             }
             public override void SwitchState(ProjectileStateMachine projectile)
@@ -173,7 +173,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.SetState<Alt3Combo2>(false, 1.7f, 0.9f, -2.4f, 2.4f, 0f, true, 6f);
+                projmod.SetState<Alt3Combo2>(false, 1.7f, 0.9f, -2.4f, 2.4f, 0f, 0f, true, 6f);
             }
         }
         private class Alt3Combo2 : Wield
@@ -184,7 +184,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 3f;
+                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 2.8f;
                 player.velocity.Y += 15f;
             }
             public override void SwitchState(ProjectileStateMachine projectile)
@@ -192,7 +192,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.SetState<Alt3Combo3>(false, 1.7f, 0.9f, -1.6f, 1.2f, 0f, true, 6f);
+                projmod.SetState<Alt3Combo3>(false, 1.7f, 0.9f, -1.6f, 1.2f, 0f, 0f, true, 6f);
             }
         }
         private class Alt3Combo3 : Wield
@@ -203,7 +203,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 3f;
+                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 2.8f;
             }
         }
         private class Alt4Combo1 : Wield
@@ -235,7 +235,8 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 if (projmod.Timer <= HoldupTimeMax)
                 {
                     float timer = (float)projmod.Timer / (float)HoldupTimeMax;
-                    projmod.MoveSwordSet(proj, projmod.PrepSet, timer);
+                    //projmod.MoveSwordSet(proj, projmod.PrepSet, timer);
+                    projmod.LerpSwordStruct(proj, projmod.TargetStruct1, timer, true, true);
                     if (projmod.ApplyDissolve) projmod.DissolveRate = timer;
                 }
                 else
@@ -336,66 +337,3 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         }
     }
 }
-
-
-
-
-
-/*
-    public class FlyingGrass : ModProjectile
-    {
-        public override string Texture => "Terraria/Images/Projectile_976";
-        public override void SetDefaults()
-        {
-            Projectile.width = 30;
-            Projectile.height = 18;
-            Projectile.penetrate = -1;
-            Projectile.tileCollide = true;
-            Projectile.timeLeft = 210;
-            Projectile.aiStyle = -1;
-            Projectile.friendly = false;
-            Projectile.hostile = false;
-        }
-        public override void OnSpawn(IEntitySource source)
-        {
-            Projectile.frame = Main.rand.Next(0, 7);
-        }
-        public override void AI()
-        {
-            Player player = Main.player[Projectile.owner];
-            if (player.HeldItem.type != ItemID.BladeofGrass) Projectile.Kill();
-            if (Projectile.Hitbox.Intersects(player.Hitbox) && Projectile.ai[0] >= 30)
-            {
-                player.GetModPlayer<BladeOfGrassPlayer>().Special = true;
-                player.GetModPlayer<BladeOfGrassPlayer>().SpecialTimer = 6;
-                Projectile.Kill();
-            }
-            Projectile.ai[0]++;
-            Projectile.velocity.X = (float)Math.Sin(Projectile.ai[0] / 15) * 4;
-            Projectile.velocity.Y = 0.2f;
-            if (Projectile.ai[0] > 200)
-                Projectile.alpha += 25;
-        }
-        public override bool PreDraw(ref Color lightColor)
-        {
-            SpriteEffects effects = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-            Texture2D MainTex = ModContent.Request<Texture2D>(Texture).Value;
-            int frameheight = MainTex.Height / 7;
-            Rectangle Mainframe = new Rectangle(0, Projectile.frame * frameheight, Projectile.width, Projectile.height);
-            Main.EntitySpriteDraw(MainTex, Projectile.Center - Main.screenPosition, Mainframe, Color.White * ((255 - Projectile.alpha) / 255f), 0f, Projectile.Size / 2, Projectile.scale, effects, default);
-            return false;
-        }
-    }
-    public class BladeOfGrassPlayer : ModPlayer
-    {
-        public bool Special = false;
-        public int SpecialTimer = 0;
-        public override void PostUpdateMiscEffects()
-        {
-            if (SpecialTimer > 0) SpecialTimer--;
-            if (SpecialTimer <= 0) Special = false;
-        }
-    }
-}
-
- */
