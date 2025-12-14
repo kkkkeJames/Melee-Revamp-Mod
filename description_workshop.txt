@@ -1,3 +1,13 @@
-Melee Revamp is a mod in development that aims at reworking attack ways of vanilla melee weapons. This mod reworks the attacking ways of melee weapons so they attack more smoothly, have better visual effects, and serves as better weapons compare to weapons of other damage types. This mod also adds "sword power" to each reworked melee weapon, which is a resource that can boost damage (and trigger special moves in future versions) if weapons are used properly.
-This mod is under development. Currently, 8 pre-hardmode metal bar swords & Blood Butcherer & Blade Of Grass are being revamped. This mod plans to rework most melee weapons (mostly swords, but also include weapons like spears, flails and others) and add more moves so different weapons have entirely different attack patterns. 
-About future updates: This mod is solo-developed, so it may have a slow update rate. This mod will have a big update after its creator rewrites state machine structures.
+﻿Melee Revamp is a mod in development that aims at reworking attack ways of vanilla melee weapons. This mod reworks the attacking ways of melee weapons so they have better attacking moves and vfx. 
+Most broadswords now follows a default attack pattern. Several weapons like the blade or grass have special attacking moves and alternative attacks. Right click to trigger alternative attacks. The latter can be disabled in config.
+This mod adds a sword power gauge system to each reworked melee weapon, which is a resource that can boost damage and alternative attack effects if weapons are used properly. This can be disabled in config.
+This mod is under development. This mod plans to rework most melee weapons (mostly swords, but also include weapons like spears, flails and others) and add more moves so different weapons have entirely different attack patterns.
+Due to compatibility issue, True Night's Edge and Terra Blade will be reworked in future versions.
+Have any suggestions or find any bugs? Feel free to leave them in the comment.
+
+近战更新是一个正在开发中的模组，旨在重新设计原版近战武器的攻击方式。该模组重新设计了近战武器的攻击方式，使其拥有更好的攻击动作和视觉效果。
+大多数阔剑现在都遵从默认攻击模式。某些武器如草剑具有特殊的攻击动作和特殊攻击。右键以触发特殊攻击。后者可以在配置中禁用。
+该模组为每个重新设计的近战武器添加了剑意值系统，一种在合理使用武器时可以提升伤害和特殊攻击效果的资源。此功能可以在配置中禁用。
+此模组正在开发中。此模组计划将来更新大部分近战武器（主要是剑，但也包括长矛、链锤等武器），并添加更多动作，使不同武器具有完全不同的攻击模组。
+由于兼容性问题，真永夜刃和泰拉刃将在未来版本中被重做。
+有任何建议或者发现bug，请在评论区留言。

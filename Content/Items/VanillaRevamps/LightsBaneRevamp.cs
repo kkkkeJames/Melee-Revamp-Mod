@@ -1,5 +1,4 @@
-﻿/*
-using MeleeRevamp.Content.Core;
+﻿using MeleeRevamp.Content.Core;
 using MeleeRevamp.Content.Projectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,6 +9,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using static MeleeRevamp.Content.Items.VanillaRevamps.BladeOfGrassSlash;
 
 namespace MeleeRevamp.Content.Items.VanillaRevamps
 {
@@ -29,92 +29,32 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.useTime = item.useAnimation = 30;
-            item.shoot = ModContent.ProjectileType<LightsBaneSlash>();
+            item.useTime = item.useAnimation = 26;
+            item.shoot = ProjectileID.None;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.6f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<LightsBaneSlash>()] < 1)
             {
                 var proj = Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<LightsBaneSlash>(), item.damage, item.knockBack, player.whoAmI);
             }
-            if (normalend == true) 
-            {
-                timer++; 
-                if (timer >= 60)
-                {
-                    normalend = false; 
-                }
-            }
-            else timer = 0;
         }
-        public override bool AltFunctionUse(Item item, Player player)
+        public override bool CanUseItem(Item item, Player player)
         {
-            return true;
-        }
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            if (player.altFunctionUse == 0)
-            {
-                timer = 0;
-                if (normalend)
-                {
-                    phase++;
-                    if (phase == 4)
-                        phase = 0;
-                }
-                else
-                {
-                    phase = 0;
-                }
-                normalend = true;
-                foreach (Projectile proj in Main.projectile)
-                {
-                    if (proj.type == ModContent.ProjectileType<LightsBaneSlash>() && proj.owner == player.whoAmI && proj != null)
-                    {
-                        switch (phase)
-                        {
-                            case 0:
-                                ((LightsBaneSlash)proj.ModProjectile).WieldTrigger(true, 1.7f * item.scale, 0.7f, -2.1f, 1.8f, 0.3f, 8);
-                                break;
-                            case 1:
-                                ((LightsBaneSlash)proj.ModProjectile).StabTrigger(true, 0.3f);
-                                break;
-                            case 2:
-                                ((LightsBaneSlash)proj.ModProjectile).WieldTrigger(true, 2.2f * item.scale, 0.5f, -2.6f, 2.4f, -0.2f, 8);
-                                break;
-                            case 3:
-                                ((LightsBaneSlash)proj.ModProjectile).WieldTrigger(true, 2.2f * item.scale, 0.5f, -2.6f, 2.4f, -0.2f, 8);
-                                break;
-                        }
-                    }
-                }
-            }
-            else if (player.altFunctionUse == 2)
-            {
-                foreach (Projectile proj in Main.projectile)
-                {
-                    if (proj.type == ModContent.ProjectileType<LightsBaneSlash>() && proj.owner == player.whoAmI && proj != null)
-                    {
-                        ((LightsBaneSlash)proj.ModProjectile).AltChargeTrigger(normalend);
-                    }
-                    normalend = false;
-                }
-            }
             return false;
         }
     }
     public class LightsBaneSlash : GlobalSwordSlash
     {
         public override string Texture => "Terraria/Images/Item_" + ItemID.LightsBane;
-        public bool AltAttacking = false;
-        public bool AltAttackHit = false;
-        public LightsBaneSlash()
+        public override void RegisterVariables()
         {
-
+            Player player = Main.player[Projectile.owner];
+            SwordDust1 = DustID.Demonite;
+            SlashColor = Color.BlueViolet;
+            MaxComboCount = 4;
         }
         public override void Appear()
         {
@@ -122,18 +62,34 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void Initialize()
         {
             base.Initialize();
-            RegisterState(new AltCharge());
-            RegisterState(new QuickAltCharge());
-            RegisterState(new AltAttack());
-            RegisterState(new AltAttackCombo1());
             //RegisterState(new AltAttackCombo2());
         }
-        public override void RegisterVariables()
+        public override void AIBefore()
         {
+            base.AIBefore();
             Player player = Main.player[Projectile.owner];
-            SwordDust1 = DustID.Demonite;
-            SlashColor = Color.BlueViolet;
+            if (LeftClick)
+            {
+                switch (ComboCount)
+                {
+                    case 0:
+                        ((LightsBaneSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.7f, -2.1f, 1.8f, 0.2f, 0f, true, 8f);
+                        break;
+                    case 1:
+                        ((LightsBaneSlash)Projectile.ModProjectile).SetState<Stab>(true, 0.2f);
+                        break;
+                    case 2:
+                        ((LightsBaneSlash)Projectile.ModProjectile).SetState<Wield>(true, 2.2f, 0.5f, -2.6f, 2.4f, 0.2f, 0f, true, 8f);
+                        break;
+                    case 3:
+                        ((LightsBaneSlash)Projectile.ModProjectile).SetState<Wield>(true, 2.2f, 0.5f, -2.6f, 2.4f, 0.2f, 0f, true, 8f);
+                        break;
+                }
+            }
         }
+    }
+}
+/*
         public void AltChargeTrigger(bool quick = false)
         {
             Player player = Main.player[Projectile.owner];

@@ -7,33 +7,20 @@ namespace MeleeRevamp.Content.Core
 {
     public class ScreenShake : ModPlayer
     {
-        public int SSStimer = 3;
-        public int SSSrange = 0;
-        public float SSSradius = 0;
-        public void ScreenShakeShort(int length, float radius)
+        public float ScreenshakeIntensity = 0f;
+        public float ScreenshakeAngle = 0f;
+        public void ScreenShakeShort(float intensity, float angle = 0f)
         {
-            Main.screenPosition += new Vector2(length, 0).RotatedBy(radius);
-            SSSrange = (int)(length * (SSStimer - 1f / SSStimer));
-            SSSradius = radius;
-            SSStimer--;
-            if (SSStimer == 0) SSStimer = 3;
+            ScreenshakeIntensity = intensity; 
+            ScreenshakeAngle = angle;
         }
-        public int SSCtimer = 0;
-        public int SSCrange = 0;
 
-        public void ScreenShakeContinue(int time, int range)
-        {
-            SSCtimer = time;
-            SSCrange = range;
-            Main.screenPosition += new Vector2(Main.rand.Next(-range, range), Main.rand.Next(-range, range));
-            SSCtimer--;
-        }
         public override void ModifyScreenPosition()
         {
-            if (SSStimer > 0 && SSStimer != 3)
-                ScreenShakeShort(SSSrange, SSSradius);
-            if (SSCtimer > 0)
-                ScreenShakeContinue(SSCtimer, SSCrange);
+            Main.screenPosition += new Vector2(ScreenshakeIntensity, 0).RotatedBy(ScreenshakeAngle);
+            if (ScreenshakeIntensity > 0.3f)
+                ScreenshakeIntensity *= 0.7f;
+            else ScreenshakeIntensity = 0f;
         }
 
     }

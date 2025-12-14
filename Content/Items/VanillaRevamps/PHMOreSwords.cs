@@ -20,14 +20,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<CopperBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<CopperBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<CopperBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -64,7 +64,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -82,14 +82,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<TinBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<TinBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TinBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -126,7 +126,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -144,14 +144,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<IronBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<IronBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<IronBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -188,7 +188,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -206,14 +206,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<LeadBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<LeadBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<LeadBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -250,7 +250,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -268,14 +268,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<SilverBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<SilverBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<SilverBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -312,7 +312,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -330,14 +330,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<TungstenBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<TungstenBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<TungstenBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -374,7 +374,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -392,14 +392,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<GoldBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<GoldBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<GoldBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -436,7 +436,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }
@@ -454,14 +454,14 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noUseGraphic = true;
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ModContent.ProjectileType<PlatinumBroadSwordSlash>();
+            item.shoot = ProjectileID.None;
             item.useTime = item.useAnimation = 33;
             item.channel = true;
             item.autoReuse = false;
         }
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1f;
+            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 1.2f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<PlatinumBroadSwordSlash>()] < 1)
                 Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<PlatinumBroadSwordSlash>(), item.damage, item.knockBack, player.whoAmI);
         }
@@ -498,7 +498,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, -0.4f, 0f, true, 6f, true, true, 0f, 1.2f);
+                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
                         break;
                 }
             }

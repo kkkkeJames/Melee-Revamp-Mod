@@ -1,0 +1,52 @@
+Mods: {
+	MeleeRevamp: {
+		GenericTooltips: {
+			Broadswords: {
+				Tip1: 最大剑意值: {0}
+				Tip2: 武器伤害随剑意值增加
+				Tip3: 近战击中敌人以增加剑意值
+			}
+		}
+
+		// "Keybinds.Switch Melee weapon Alternate Attack Mode.DisplayName": Switch  Melee weapon  Alternate  Attack  Mode
+
+		Projectiles: {
+			// BladeOfGrassSlash.DisplayName: Blade Of Grass Slash
+			// BloodButchererSlash.DisplayName: Blood Butcherer Slash
+			// CopperBroadSwordSlash.DisplayName: Copper Broad Sword Slash
+			// DefaultBroadswordSlash.DisplayName: Default Broadsword Slash
+			// EnchantedSwordSlash.DisplayName: Enchanted Sword Slash
+			// GoldBroadSwordSlash.DisplayName: Gold Broad Sword Slash
+			// GrassSlash.DisplayName: Grass Slash
+			// IronBroadSwordSlash.DisplayName: Iron Broad Sword Slash
+			// LeadBroadSwordSlash.DisplayName: Lead Broad Sword Slash
+			// LightsBaneSlash.DisplayName: Lights Bane Slash
+			// PlatinumBroadSwordSlash.DisplayName: Platinum Broad Sword Slash
+			// SilverBroadSwordSlash.DisplayName: Silver Broad Sword Slash
+			// TinBroadSwordSlash.DisplayName: Tin Broad Sword Slash
+			// TungstenBroadSwordSlash.DisplayName: Tungsten Broad Sword Slash
+			// GlobalSwordDrive.DisplayName: Global Sword Drive
+		}
+
+		Configs: {
+			MeleeRevampConfigClient: {
+				// DisplayName: Melee Revamp Config Client
+
+				SwordPowerGaugeDisable: {
+					// Label: Sword Power Gauge Disable
+					// Tooltip: ""
+				}
+
+				CameraLockDisable: {
+					// Label: Camera Lock Disable
+					// Tooltip: ""
+				}
+
+				ShakeIntensity: {
+					// Label: Shake Intensity
+					// Tooltip: ""
+				}
+			}
+		}
+	}
+}

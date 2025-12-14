@@ -1,1 +1,1 @@
-Melee Revamp is a mod in development that aims at reworking attack ways of vanilla melee weapons. This mod reworks the attacking ways of melee weapons and adds "sword power", a resource that can boost damage if weapons are used properly, to each reworked item.
+Melee Revamp is a mod in development that aims at reworking attack ways of vanilla melee weapons. This mod reworks the attacking moves of melee weapons, mostly broadswords, and adds sword power gauge system, a resource that can boost damage if weapons are used properly, to each reworked item.

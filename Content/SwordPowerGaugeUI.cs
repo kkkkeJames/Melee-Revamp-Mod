@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MeleeRevamp.Content.Items.VanillaRevamps;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
@@ -15,7 +16,7 @@ namespace MeleeRevamp.Content
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
             MeleeRevampPlayer ModPlayer = Main.LocalPlayer.GetModPlayer<MeleeRevampPlayer>();
-            if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && ModPlayer.SwordPowerGaugeMax > 0) // If the player is active, not dead, and has a max SwordGauge over 0
+            if (!MeleeRevampConfigClient.Instance.SwordPowerGaugeDisable && Main.LocalPlayer.active && !Main.LocalPlayer.dead && ModPlayer.SwordPowerGaugeMax > 0.0f) // If the client does not disable sword power, the player is active, not dead, and has a max SwordGauge over 0
             {
                 int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Ruler"));
                 LegacyGameInterfaceLayer EnergyGaugeUI = new("Sword Gauge UI",

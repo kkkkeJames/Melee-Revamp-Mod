@@ -25,14 +25,13 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             item.noMelee = true;
             item.useStyle = ItemUseStyleID.Shoot;
             item.useTime = item.useAnimation = 20;
-            item.shoot = ModContent.ProjectileType<BladeOfGrassSlash>();
+            item.shoot = ProjectileID.None;
             item.channel = true;
             item.autoReuse = false;
         }
         public bool mouseright = false;
         public override void HoldItem(Item item, Player player)
         {
-            player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax = 2.4f;
             if (player.ownedProjectileCounts[ModContent.ProjectileType<BladeOfGrassSlash>()] < 1)
             {
                 var proj = Projectile.NewProjectileDirect(player.GetSource_ItemUse(item), player.Center, Vector2.Zero, ModContent.ProjectileType<BladeOfGrassSlash>(), item.damage, item.knockBack, player.whoAmI);
@@ -61,6 +60,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override void Initialize()
         {
             base.Initialize();
+            RegisterState(new LeftAltCombo1());
             RegisterState(new Alt1Combo1());
             RegisterState(new Alt2Combo1());
             RegisterState(new Alt2Combo2());
@@ -78,20 +78,22 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 switch (ComboCount)
                 {
                     case 0:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.7f, -2f, 1.9f, 0.2f, 0f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.7f, -2f, 1.9f, 0.3f, 0f, true, 6f);
                         break;
                     case 1:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.6f, 2f, -2f, 0.2f, 0f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.6f, 2f, -2f, 0.3f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Stab>(true, 0.2f);
+                        if (((BladeOfGrassSlash)Projectile.ModProjectile).ComboTimer <= 60)
+                            ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Stab>(true, 0.3f);
+                        else ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<LeftAltCombo1>(true, 0f, false, 0.8f);
                         break;
                     case 3:
-                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.8f, -2.2f, 2.1f, 0.2f, 0f, true, 6f);
+                        ((BladeOfGrassSlash)Projectile.ModProjectile).SetState<Wield>(true, 1.7f, 0.8f, -2.2f, 2.1f, 0.3f, 0f, true, 6f);
                         break;
                 }
             }
-            if (RightClick && player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge >= 0.6f)
+            if (RightClick)
             {
                 switch (ComboCount)
                 {
@@ -110,10 +112,37 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 }
             }
         }
+        private int LeftAltCombo1Count = 0;
+        public class LeftAltCombo1 : Stab
+        {
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                base.TriggerAI(projectile, args);
+                Projectile proj = projectile.Projectile;
+                BladeOfGrassSlash projmod = (BladeOfGrassSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                Main.NewText("Trigger");
+            }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                Projectile proj = projectile.Projectile;
+                BladeOfGrassSlash projmod = (BladeOfGrassSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                ((BladeOfGrassSlash)proj.ModProjectile).LeftAltCombo1Count++;
+                Main.NewText(Main.mouseLeft);
+                if (Main.mouseLeft && ((BladeOfGrassSlash)proj.ModProjectile).LeftAltCombo1Count < 12)
+                {
+                    projmod.SetState<LeftAltCombo1>(true, 0f, false, 0.8f);
+                }
+                else
+                {
+                    ((BladeOfGrassSlash)proj.ModProjectile).LeftAltCombo1Count = 0;
+                    base.SwitchState(projectile);
+                }
+            }
+        }
         private class Alt1Combo1 : Wield
         {
-            public Vector2 slashpos1;
-            public Vector2 slashpos2;
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
                 base.TriggerAI(projectile, args);

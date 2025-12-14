@@ -15,7 +15,6 @@ using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 
 namespace MeleeRevamp.Content.Projectiles
 {
@@ -237,7 +236,8 @@ namespace MeleeRevamp.Content.Projectiles
             Projectile.height = (int)(Projectile.scale * SwordTexture.Height); //Projectile lenghts = texture lenghts * projectile scale
             SwordRadius = MeleeRevampMathHelper.PythagoreanHelper(Projectile.width, Projectile.height) / 2; // Use pythagorean to calculate radius of texture
             DrawBehindPlayer = false; // Draw the sword behind the player
-            Projectile.damage = (int)(player.HeldItem.damage * DamageScale * (1 + MeleeRevampPlayer.SwordPowerGauge / 2f)); // Damage = item damage * damage scale (mostly modified by attacks) * (1 + SwordPowerGauge/2f)
+            if (!MeleeRevampConfigClient.Instance.SwordPowerGaugeDisable)
+                Projectile.damage = (int)(player.HeldItem.damage * DamageScale * (1 + MeleeRevampPlayer.SwordPowerGauge / 2f)); // Damage = item damage * damage scale (mostly modified by attacks) * (1 + SwordPowerGauge/2f)
             Projectile.CritChance = player.HeldItem.crit; // Crit = Item crit
             Projectile.knockBack = player.HeldItem.knockBack; // knockback = Item knockback
             Projectile.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
@@ -306,6 +306,7 @@ namespace MeleeRevamp.Content.Projectiles
             public float WieldHoldRot; // The hold rot
             public float WieldFinalRot; // The final rot
             public bool WieldCombo; // Whether start the combo recovery timer after this wield
+            public int WieldDirection; // Player direction-just for debugging
             #endregion
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
@@ -331,6 +332,7 @@ namespace MeleeRevamp.Content.Projectiles
                 if (SPGaugeCost > 0.0f)
                 {
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge -= SPGaugeCost;
+                    if (player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge < 0.0f) player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0.0f;
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = MathF.Round(player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge, 1);
                 }
 
@@ -357,6 +359,7 @@ namespace MeleeRevamp.Content.Projectiles
                 WieldStandardScale = longRadius; // Change radius issue
                 WieldThinScale = shortRadiusScale;
                 projmod.WieldHandleLength = handleLength;
+                projmod.WieldDrawLessLength = handleLength;
                 projmod.TargetStruct1.SetStruct(new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(WieldHoldRot), WieldHoldRot, WieldHoldRot - (float)Math.PI / 2f, scl);
                 // Calculate the final rotation by all those inputs with the ellipse radius helper
                 int targscaleflag = projmod.ShouldCountMouse ? 1 : 0;
@@ -374,6 +377,7 @@ namespace MeleeRevamp.Content.Projectiles
                 projmod.SwordPowerGaugeAdd = SPGaugeAdd;
                 projmod.isCombo = false;
                 projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
+                WieldDirection = player.direction;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -381,6 +385,7 @@ namespace MeleeRevamp.Content.Projectiles
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
+                player.direction = WieldDirection;
                 projmod.ShouldDrawArm = true; // Player's arm angle is determined by code
                 player.itemAnimation = player.itemTime = 2; // The player is always in using weapon state
                 int HoldupTimeMax = 24; // The time player hold up the sword, which is 6f in this case
@@ -413,7 +418,13 @@ namespace MeleeRevamp.Content.Projectiles
                     //projmod.ArmToSwordOffset = new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(proj.rotation); // Modify the player's arm rotation
                     proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, projmod.Projectile.rotation - (projmod.ShouldCountMouse ? (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) : 0)); // Change sword's scale
                     //projmod.ArmRotation = proj.rotation - (float)Math.PI / 2; // The arm moves with the sword
-                    projmod.WieldDrawRadius[WieldTimer] = projmod.SwordRadius; 
+                    projmod.WieldDrawRadius[WieldTimer] = projmod.SwordRadius;
+                    #endregion
+                    #region Shoot Projectile (If the projectile shot is set in the weapon item)
+                    if (player.HeldItem.shoot != 0 && projmod.Timer == HoldupTimeMax + 1)
+                    {
+                        Projectile.NewProjectileDirect(proj.GetSource_FromThis(), player.Center, projmod.MousePos / projmod.MousePos.Length() * player.HeldItem.shootSpeed, player.HeldItem.shoot, (int)(proj.damage * 0.75f), proj.knockBack);
+                    }
                     #endregion
                     #region (Not Implemented) Deflect projectiles
                     if (projmod.Timer >= -12 + HoldupTimeMax + WieldTimeMax / 4 && projmod.Timer <= 12 + HoldupTimeMax + WieldTimeMax / 4)
@@ -635,7 +646,7 @@ namespace MeleeRevamp.Content.Projectiles
             if (isCombo)
                 ComboTimer++;
             else ComboTimer = 0;
-            if (ComboTimer >= 240) // After 1s of recovery, reset ComboCount so the player ends a combo
+            if (ComboTimer >= 120) // After 0.5s of recovery, reset ComboCount so the player ends a combo
             {
                 ComboTimer = 0;
                 isCombo = false;
@@ -677,11 +688,10 @@ namespace MeleeRevamp.Content.Projectiles
             if (ApplyStuck) WieldStuckTimer = 8;
             #endregion
             #region Knockback & Screen Shake
-            if (ApplyScreenShake)
+            if (ApplyScreenShake && !MeleeRevampConfigClient.Instance.CameraLockDisable)
             {
                 Vector2 dis = target.position - Projectile.Center;
-                int length = (ApplyGreaterScreenShake) ? 48 : 24;
-                player.GetModPlayer<ScreenShake>().ScreenShakeShort(length, (float)Math.Atan(dis.Y / dis.X));
+                Main.LocalPlayer.GetModPlayer<ScreenShake>().ScreenShakeShort((int)((ApplyGreaterScreenShake) ? 36 : 18 * MeleeRevampConfigClient.Instance.ShakeIntensity), (float)Math.Atan(dis.Y / dis.X));
             }
             Projectile.velocity.X = player.direction == 1 ? 1 : -1; //Change projectile direction to adjust knockback direction
             #endregion
@@ -798,8 +808,8 @@ namespace MeleeRevamp.Content.Projectiles
                 for (int i = 0; i < iTimer; i++) // Track the cache to read the key variables for drawing slash using vertex paint
                 {
                     Vector2 pos = Projectile.Center - new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation) - Main.screenPosition; 
-                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] * 2 - (WieldDrawLessLength * Projectile.scale), 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / iTimer)));
-                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i], 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0.12f, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / iTimer)));
+                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] * 2, 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / iTimer)));
+                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] / 2, 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0.5f, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / iTimer)));
                 }
                 #region Set up vertex paint
                 Main.spriteBatch.End();
@@ -907,8 +917,8 @@ namespace MeleeRevamp.Content.Projectiles
                 for (int i = 0; i < iTimer; i++) // Track the cache to read the key variables for drawing slash using vertex paint
                 {
                     Vector2 pos = Projectile.Center - new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation) - Main.screenPosition; // The center of rot is always the projectile center
-                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] * 2 - WieldDrawLessLength * Projectile.scale, 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / SlashDrawTimer)));
-                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i], 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0.12f, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / SlashDrawTimer)));
+                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] * 2, 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / SlashDrawTimer)));
+                    slash.Add(new VertexInfo2(pos + new Vector2(WieldDrawRadius[SlashDrawTimer - i] / 2, 0).RotatedBy(Projectile.oldRot[i]), new Vector3(1 - (float)i / SlashDrawTimer, 0.12f, 1), SlashColor * MathHelper.Lerp(1, 0, (float)i / SlashDrawTimer)));
                 }
                 #region Set up vertex paint
                 Main.spriteBatch.End();
