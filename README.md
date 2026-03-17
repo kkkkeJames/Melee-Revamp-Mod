@@ -24,12 +24,11 @@ Due to compatibility issue, True Night's Edge and Terra Blade will be reworked i
 ---
 
 ## Gallery
-![Revamp Example 1](Frostbrand.gif)
-![Revamp Example 2](BladeOfGrass.gif)
+![Revamp Example 1](BladeOfGrass.gif)
 *Default swords: Procedural slashes with custom distortion shaders.*
-![Revamp Example 3](NightsEdge.gif)
+![Revamp Example 2](NightsEdge.gif)
 *Night's Edge: Procedural stabs with distortion & camera control.*
-![Revamp Example 4](Volcano.gif)
+![Revamp Example 3](Volcano.gif)
 *Volcano: Procedural flame with bloom.*
 
 ---
