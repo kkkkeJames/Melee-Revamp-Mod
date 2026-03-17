@@ -1,4 +1,5 @@
 ﻿using MeleeRevamp.Content.Core;
+using MeleeRevamp.Content.Items.VanillaRevamps;
 using MeleeRevamp.Content.Particles;
 using Microsoft.Build.Execution;
 using Microsoft.Xna.Framework;
@@ -12,6 +13,7 @@ using System.Security.Policy;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.Graphics.CameraModifiers;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -31,6 +33,7 @@ namespace MeleeRevamp.Content.Projectiles
         public static Asset<Texture2D> SlashTexture;
         public static Asset<Texture2D> WarpTexture;
         public static Asset<Texture2D> DissolveTexture;
+        public string ShaderTexture = "MeleeRevamp/Content/Assets/ShaderColor/Demonite";
         public override void Load()
         {
             SlashTexture = ModContent.Request<Texture2D>("MeleeRevamp/Content/Assets/SlashTex");
@@ -222,6 +225,7 @@ namespace MeleeRevamp.Content.Projectiles
             RegisterState(new Idle());
             RegisterState(new Wield());
             RegisterState(new Stab());
+            RegisterState(new Lunge());
             RegisterState(new Recover());
         }
         public override void AIBefore()
@@ -240,7 +244,8 @@ namespace MeleeRevamp.Content.Projectiles
                 Projectile.damage = (int)(player.HeldItem.damage * DamageScale * (1 + MeleeRevampPlayer.SwordPowerGauge / 2f)); // Damage = item damage * damage scale (mostly modified by attacks) * (1 + SwordPowerGauge/2f)
             Projectile.CritChance = player.HeldItem.crit; // Crit = Item crit
             Projectile.knockBack = player.HeldItem.knockBack; // knockback = Item knockback
-            Projectile.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
+            Projectile.localNPCHitCooldown = (int)TimeMax / 2;
+            //Projectile.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
 
             if (MeleeRevamp.SwitchAlternateAttack.JustPressed) // Switch Alternate Attack mode even before AI
                 AlternateAttackIndex = AlternateAttackCount == 0 ? 0 : (AlternateAttackIndex + 1) % AlternateAttackCount;
@@ -297,6 +302,7 @@ namespace MeleeRevamp.Content.Projectiles
         public int WieldStopTime; // Time to stop attack
         public float WieldHandleLength; // The length of handle for wield
         public float WieldDrawLessLength = 0; // Distance from vertex paint to sword
+        public bool FullGaugeCost; // Did this wield attack cost full gauge cost
         #endregion
         public class Wield : ProjectileState
         {
@@ -314,7 +320,7 @@ namespace MeleeRevamp.Content.Projectiles
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
                 if (args.Length < 6)
-                    throw new Exception ("Not enough arguments for switching to Wield state.");
+                    throw new Exception("Not enough arguments for switching to Wield state, current length: "+ args.Length);
                 bool countMouseAngle = (bool)args[0];
                 float longRadius = (float)args[1];
                 float shortRadiusScale = (float)args[2];
@@ -326,13 +332,18 @@ namespace MeleeRevamp.Content.Projectiles
                 float handleLength = args.Length >= 9 ? (float)args[8] : 0f;
                 bool applyStuckVisual = args.Length >= 10 ? (bool)args[9] : false;
                 bool applyScreenShake = args.Length >= 11 ? (bool)args[10] : false;
-                float stopRotTime = args.Length >= 12 ? (float)args[11] : 0f;
+                int stopRotTime = args.Length >= 12 ? (int)args[11] : 0;
                 float damageScale = args.Length >= 13 ? (float)args[12] : 1f;
-
+                projmod.WieldStopTime = stopRotTime;
                 if (SPGaugeCost > 0.0f)
                 {
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge -= SPGaugeCost;
-                    if (player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge < 0.0f) player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0.0f;
+                    projmod.FullGaugeCost = true;
+                    if (player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge < 0.0f)
+                    {
+                        projmod.FullGaugeCost = false; 
+                        player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0.0f;
+                    }
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = MathF.Round(player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge, 1);
                 }
 
@@ -459,8 +470,6 @@ namespace MeleeRevamp.Content.Projectiles
                 projmod.SetState<Recover>();
             }
         }
-        public bool StabAttack = false; 
-        public bool StabAttackStopDraw = false; 
         /*
          * State: Stab
          * Structure is similar to wield, but more time based as their attack ways are totally different
@@ -478,6 +487,7 @@ namespace MeleeRevamp.Content.Projectiles
                 float SPGaugeAdd = (float)args[1];
                 bool stabCombo = args.Length >= 3 ? (bool)args[2] : true;
                 float damageScale = args.Length >= 4 ? (float)args[3] : 1f;
+                bool applyScreenShake = args.Length >= 5 ? (bool)args[4] : false;
                 StabCombo = stabCombo;
                 Projectile proj = projectile.Projectile;
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
@@ -503,9 +513,11 @@ namespace MeleeRevamp.Content.Projectiles
                 }
                 projmod.ApplyStuck = true;
                 projmod.ApplySlashDust = true;
+                projmod.ApplyScreenShake = applyScreenShake;
                 projmod.SwordPowerGaugeAdd = SPGaugeAdd;
-                projmod.DamageScale = SPGaugeAdd;
+                projmod.DamageScale = damageScale;
                 projmod.isCombo = false;
+                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
             }
             public override void AI(ProjectileStateMachine projectile)
             {
@@ -514,10 +526,10 @@ namespace MeleeRevamp.Content.Projectiles
                 GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner]; 
                 player.itemAnimation = player.itemTime = 2; 
-                projmod.TimeMax = (player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
                 int HoldupTimeMax = (int)(projmod.TimeMax / 2); // Notice: hold up time = item.usetime / 4
                 int StabTimeMax = (int)(projmod.TimeMax / 4); // Stab time = item.usetime / 2
                 int RecoverTimeMax = (int)projmod.TimeMax - HoldupTimeMax - StabTimeMax; // recover time = item.usetime / 4
+                projmod.CouldHit = false;
                 projmod.Timer++; 
                 #endregion
                 #region Hold up the sword
@@ -530,12 +542,12 @@ namespace MeleeRevamp.Content.Projectiles
                 #region Stab
                 else if (projmod.Timer <= HoldupTimeMax + StabTimeMax)
                 {
-                    projmod.StabAttack = true;
-                    projmod.CouldHit = true;
                     projmod.SlashDrawTimer = projmod.Timer - HoldupTimeMax;
                     projmod.SlashDrawTimeMax = StabTimeMax;
                     if (projmod.Timer == HoldupTimeMax + 1)
                     {
+                        Projectile s = Projectile.NewProjectileDirect(proj.GetSource_FromThis(null), player.Center, new Vector2(projmod.SwordRadius * 4 / StabTimeMax, 0).RotatedBy(proj.rotation), ModContent.ProjectileType<StabTrail>(), proj.damage, proj.knockBack, proj.owner, StabTimeMax * 2, projmod.SwordPowerGaugeAdd);
+                        ((StabTrail)s.ModProjectile).ShaderColorTexture(projmod.ShaderTexture);
                         projmod.StartStruct.SetStruct(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale); 
                         projmod.TargetStruct2.SetStruct(StabEndPosAdd, proj.rotation, projmod.ArmRotation, proj.scale);
                     }
@@ -545,8 +557,6 @@ namespace MeleeRevamp.Content.Projectiles
                 #region Recover
                 else
                 {
-                    projmod.StabAttack = false;
-                    projmod.StabAttackStopDraw = true;
                     projmod.SlashDrawTimer = projmod.Timer - HoldupTimeMax - StabTimeMax;
                     projmod.SlashDrawTimeMax = RecoverTimeMax;
                     if (projmod.Timer == HoldupTimeMax + StabTimeMax + 1)
@@ -575,9 +585,111 @@ namespace MeleeRevamp.Content.Projectiles
                 projmod.TimeMax = 240;
                 projmod.isCombo = StabCombo;
                 projmod.ComboCount = (projmod.ComboCount + (StabCombo ? 1 : 0)) % projmod.MaxComboCount;
+                projmod.AttackHit = false;
                 projmod.SetState<Recover>();
             }
         }
+        /*
+         * State: Lunge
+         * Lunge forward with a sword trail. While similar to stab, the player move forward as the same direction of the sword
+         */
+        public class Lunge : ProjectileState
+        {
+            public float LungeSpeed;
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                if (args.Length < 2)
+                    throw new Exception("Not enough arguments for switching to Lunge state.");
+                bool countMouseAngle = (bool)args[0];
+                float SPGaugeAdd = (float)args[1];
+                float lungeSpeed = args.Length >= 3 ? (float)args[2] : 20f;
+                float lungeFixedAngle = args.Length >= 4 ? (float)args[3] : 0f;
+                float damageScale = args.Length >= 5 ? (float)args[4] : 1f;
+                bool applyScreenShake = args.Length >= 6 ? (bool)args[5] : false;
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                player.direction = (Main.MouseWorld - player.Center).X >= 0 ? 1 : -1; // Change player direction based on mouse position
+                projmod.Timer = 0;
+                projmod.StartStruct.SetStruct(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
+                projmod.MousePos = Main.MouseWorld - player.Center;
+                float exrot = projmod.MousePos.X > 0 ? 0 : (float)Math.PI;
+                LungeSpeed = lungeSpeed;
+                if (countMouseAngle)
+                {
+                    Vector2 StabStartPosAdd = new Vector2(-projmod.SwordRadius / 2, 0).RotatedBy((float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot);
+                    Vector2 StabEndPosAdd = new Vector2(0, 0).RotatedBy((float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot);
+                    projmod.TargetStruct1.SetStruct(StabStartPosAdd, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
+                    projmod.TargetStruct2.SetStruct(StabEndPosAdd, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot, (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) + exrot - (float)Math.PI / 2, 1.6f);
+                }
+                else
+                {
+                    Vector2 StabStartPosAdd = new Vector2(-projmod.SwordRadius / 2, 0).RotatedBy(exrot);
+                    Vector2 StabEndPosAdd = new Vector2(0, 0).RotatedBy(exrot);
+                    projmod.TargetStruct1.SetStruct(StabStartPosAdd, lungeFixedAngle + exrot, lungeFixedAngle + exrot - (float)Math.PI / 2, 1.6f);
+                    projmod.TargetStruct2.SetStruct(StabEndPosAdd, lungeFixedAngle + exrot, lungeFixedAngle + exrot - (float)Math.PI / 2, 1.6f);
+                }
+                projmod.ApplyStuck = true;
+                projmod.ApplySlashDust = true;
+                projmod.ApplyScreenShake = applyScreenShake;
+                projmod.SwordPowerGaugeAdd = SPGaugeAdd;
+                projmod.DamageScale = damageScale;
+                projmod.isCombo = false;
+                projmod.TimeMax = 54;
+            }
+            public override void AI(ProjectileStateMachine projectile)
+            {
+                #region Basic settings
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                player.itemAnimation = player.itemTime = 2;
+                int HoldupTimeMax = 24;
+                int StabTimeMax = 24;
+                projmod.Timer++;
+                #endregion
+                #region Hold up the sword
+                if (projmod.Timer <= HoldupTimeMax)
+                {
+                    projmod.LerpSwordStruct(proj, projmod.TargetStruct1, (float)projmod.Timer / HoldupTimeMax, true, true);
+                }
+                #endregion
+                #region Lunge
+                else 
+                {
+                    int TrailTime = (int)(projmod.TimeMax - HoldupTimeMax) * 2;
+                    if (projmod.Timer == HoldupTimeMax + 1)
+                        Projectile.NewProjectileDirect(proj.GetSource_FromThis(null), player.Center, new Vector2(LungeSpeed, 0).RotatedBy(proj.rotation), ModContent.ProjectileType<SwordTrail>(), proj.damage, proj.knockBack, proj.owner, TrailTime);
+                    if ((projmod.Timer - HoldupTimeMax) <= StabTimeMax)
+                        projmod.LerpSwordStruct(proj, projmod.TargetStruct2, (projmod.Timer - HoldupTimeMax) / (float)StabTimeMax, true, true);
+                    player.velocity = new Vector2(LungeSpeed * 4, 0).RotatedBy(proj.rotation);
+                    projmod.CouldHit = true;
+                }
+                #endregion
+                #region Switch state
+                if (projmod.Timer >= projmod.TimeMax)
+                {
+                    SwitchState(projectile);
+                }
+                #endregion
+            }
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                player.velocity = Vector2.Zero;
+                projmod.StartStruct.SetStruct(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale);
+                projmod.TargetStruct2.SetStruct(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
+                projmod.Timer = 0;
+                projmod.TimeMax = 240;
+                projmod.isCombo = false;
+                projmod.ComboCount = 0;
+                projmod.AttackHit = false;
+                projmod.SetState<Recover>();
+            }
+        }
+
         /* State : Recover
          * Hold the sword for 1s, when the player could switch the state of projectile
          * If the sword does not switch state, apply dissolve and make projectile invisible
@@ -595,8 +707,6 @@ namespace MeleeRevamp.Content.Projectiles
                 Player player = Main.player[proj.owner];
                 projmod.ShouldDrawArm = true;
                 projmod.WieldAttack = false;
-                projmod.StabAttack = false;
-                projmod.StabAttackStopDraw = false;
                 projmod.ChargeShader = false;
                 projmod.CouldHit = false;
                 projmod.DamageScale = 1f;
@@ -660,9 +770,7 @@ namespace MeleeRevamp.Content.Projectiles
             float point = 0f;
             if (CouldHit)
             {
-                if (StabAttack) // Stab has its own collision box
-                    return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center + new Vector2(-SwordRadius, 0).RotatedBy(Projectile.rotation), Projectile.Center + new Vector2(SwordRadius * MathHelper.Lerp(1f, 3f, (Timer - TimeMax / 2f) / (TimeMax / 4f)), 0).RotatedBy(Projectile.rotation), 8, ref point);
-                else return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center + new Vector2(-SwordRadius, 0).RotatedBy(Projectile.rotation), Projectile.Center + new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation), 8, ref point);
+                return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center + new Vector2(-SwordRadius, 0).RotatedBy(Projectile.rotation), Projectile.Center + new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation), 8, ref point);
             } // The third argument is head, the fourth is tail, the fifth is the width of collision box, fix other arguments
             else return false;
         }
@@ -690,10 +798,10 @@ namespace MeleeRevamp.Content.Projectiles
             #region Knockback & Screen Shake
             if (ApplyScreenShake && !MeleeRevampConfigClient.Instance.CameraLockDisable)
             {
-                Vector2 dis = target.position - Projectile.Center;
-                Main.LocalPlayer.GetModPlayer<ScreenShake>().ScreenShakeShort((int)((ApplyGreaterScreenShake) ? 36 : 18 * MeleeRevampConfigClient.Instance.ShakeIntensity), (float)Math.Atan(dis.Y / dis.X));
+                PunchCameraModifier camPunch = new(player.Center, new Vector2(0f, -1f), 20f * MeleeRevampConfigClient.Instance.ShakeIntensity, 3f, 10, 1000f);
+                Main.instance.CameraModifiers.Add(camPunch);
             }
-            Projectile.velocity.X = player.direction == 1 ? 1 : -1; //Change projectile direction to adjust knockback direction
+            Projectile.velocity.X = player.direction == 1 ? 1 : -1; // Change projectile velocity direction to adjust knockback direction
             #endregion
             #region Modification of Sword Gauge
             if (!AttackHit)
@@ -732,7 +840,7 @@ namespace MeleeRevamp.Content.Projectiles
             //Dust.NewDustPerfect(Projectile.Bottom + Vector2.One.RotatedByRandom(6.28f) * Main.rand.NextFloat(15), ModContent.DustType<GlowDust>(), Vector2.Zero, 0, new Color(50, 50, 255), 0.4f).fadeIn = 10;
             #endregion
             #region Apply hit dust
-            if (SwordDust1 != 0) //Dust1受重力影响
+            if (SwordDust1 != 0) //Dust1 is affected by gravity
             {
                 int num1 = Main.rand.Next(4, 7);
                 for (int i = 0; i < num1; i++)
@@ -745,7 +853,7 @@ namespace MeleeRevamp.Content.Projectiles
                     dust2.noGravity = false;
                 }
             }
-            if (SwordDust2 != 0) //Dust2自由逸散
+            if (SwordDust2 != 0) // Dust2 is free from outside forces
             {
                 int num2 = Main.rand.Next(4, 7);
                 for (int i = 0; i < num2; i++)
@@ -824,70 +932,6 @@ namespace MeleeRevamp.Content.Projectiles
                 #endregion
             }
             #endregion
-            #region Draw the slash of Stab state using vertex paint
-            if (StabAttack) 
-            {
-                List<VertexInfo2> slash = new List<VertexInfo2>();
-                for (int i = 0; i < 5; i++)
-                {
-                    float width = 16;
-                    switch (i)
-                    {
-                        case 0: width = 12; break;
-                        case 1: width = 12 + 4 / 3; break;
-                        case 2: width = 12 + 8 / 3; break;
-                        case 3: width = 16; break;
-                        case 4: width = 0; break;
-                    }
-                    width *= MathHelper.Lerp(1, 0.5f, (float)SlashDrawTimer / SlashDrawTimeMax);
-                    Vector2 pos = Projectile.Center - Main.screenPosition - new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation);
-                    slash.Add(new VertexInfo2(pos + new Vector2(SwordRadius * i * MathHelper.Lerp(0, 1, (float)SlashDrawTimer / SlashDrawTimeMax), -width).RotatedBy(Projectile.rotation), new Vector3(i / 4f, 0.9f, 1), SlashColor));
-                    slash.Add(new VertexInfo2(pos + new Vector2(SwordRadius * i * MathHelper.Lerp(0, 1, (float)SlashDrawTimer / SlashDrawTimeMax), width).RotatedBy(Projectile.rotation), new Vector3(i / 4f, 1, 1), SlashColor));
-                }
-                #region Set up vertex paint
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-                if (slash.Count >= 3)
-                {
-                    Main.graphics.GraphicsDevice.Textures[0] = SlashTexture.Value;
-                    Main.graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, slash.ToArray(), 0, slash.Count - 2);
-                }
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-                #endregion
-            }
-            if (StabAttackStopDraw)
-            {
-                List<VertexInfo2> slash = new List<VertexInfo2>();
-                for (int i = 0; i < 5; i++)
-                {
-                    float width = 16;
-                    switch (i)
-                    {
-                        case 0: width = 12; break;
-                        case 1: width = 12 + 4 / 3; break;
-                        case 2: width = 12 + 8 / 3; break;
-                        case 3: width = 16; break;
-                        case 4: width = 0; break;
-                    }
-                    width *= 0.5f;
-                    Vector2 pos = Projectile.Center - Main.screenPosition - new Vector2(SwordRadius, 0).RotatedBy(Projectile.rotation);
-                    slash.Add(new VertexInfo2(pos + new Vector2(SwordRadius * i * MathHelper.Lerp(1, 0, (float)SlashDrawTimer / SlashDrawTimeMax), -width).RotatedBy(Projectile.rotation), new Vector3(i / 4f, 0.9f, 1), SlashColor));
-                    slash.Add(new VertexInfo2(pos + new Vector2(SwordRadius * i * MathHelper.Lerp(1, 0, (float)SlashDrawTimer / SlashDrawTimeMax), width).RotatedBy(Projectile.rotation), new Vector3(i / 4f, 1, 1), SlashColor));
-                }
-                #region Set up vertex paint
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-                if (slash.Count >= 3)
-                {
-                    Main.graphics.GraphicsDevice.Textures[0] = SlashTexture.Value;
-                    Main.graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, slash.ToArray(), 0, slash.Count - 2);
-                }
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-                #endregion
-            }
-            #endregion
             return false;
         }
         public override void PostDraw(Color lightColor)
@@ -935,48 +979,126 @@ namespace MeleeRevamp.Content.Projectiles
         }
 
     }
-
-    //The sword drive of sword while in Stab state
-    public class GlobalSwordDrive : ModProjectile
+    // Just like how to draw sword trail, draw the sword trail while in stab state similarly
+    public class StabTrail : ModProjectile, IDrawWarp
     {
-        public Color color = Color.White;
-        public override string Texture => "MeleeRevamp/Content/Assets/SlashTex";
+        public override string Texture => "MeleeRevamp/Content/Assets/ShaderColor/Demonite";
+        public string ColorShaderTexture;
+        public float CurveTimeleft;
+        public float upScale, downScale;
+        public float headScale, bottomScale;
+        private Vector2[] PosCache = new Vector2[30];
+        private Vector2 FakeCenter = Vector2.Zero;
+        public void ShaderColorTexture(string input)
+        {
+            ColorShaderTexture = input;
+        }
         public override void SetDefaults()
         {
-            Projectile.width = 128;
-            Projectile.height = 16;
-            Projectile.timeLeft = 15;
-            Projectile.hostile = false;
-            Projectile.friendly = true;
+            base.SetDefaults();
             Projectile.DamageType = DamageClass.MeleeNoSpeed;
+            Projectile.friendly = true;
+            Projectile.timeLeft = 60;
+            Projectile.scale = 1;
+            Projectile.extraUpdates = 3;
+            Projectile.height = 80;
+            Projectile.tileCollide = false;
+            Projectile.penetrate = -1;
+            Projectile.usesLocalNPCImmunity = true;
+        }
+        public override void OnSpawn(IEntitySource source)
+        {
+            base.OnSpawn(source);
+            Projectile.timeLeft = Projectile.localNPCHitCooldown = (int)Projectile.ai[0];
+            PosCache = new Vector2[(int)Projectile.ai[0] / 2];
+            CurveTimeleft = Main.rand.Next((int)(Projectile.ai[0] / 4 * 3) - 3, (int)(Projectile.ai[0] / 4 * 3) + 3);
+            upScale = Main.rand.NextFloat(0.9f, 1f);
+            downScale = Main.rand.NextFloat(0.9f, 1f);
+            headScale = Main.rand.NextFloat(0.2f, 0.3f);
+            bottomScale = Main.rand.NextFloat(0.6f, 0.8f);
         }
         public override void AI()
         {
-            Projectile.rotation = (float)Math.Atan(Projectile.velocity.Y / Projectile.velocity.X);
+            Player player = Main.player[Projectile.owner];
+            FakeCenter += Projectile.velocity;
+            Projectile.Center = player.Center;
+            if (Projectile.timeLeft > Projectile.ai[0] / 2)
+            {
+                for (int i = PosCache.Length - 1; i > 0; i--)
+                {
+                    PosCache[i] = PosCache[i - 1];
+                }
+                PosCache[0] = FakeCenter;
+            }
+            if (Projectile.timeLeft <= Projectile.ai[0] / 2 + 1)
+                Projectile.velocity = Vector2.Zero;
+        }
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        {
+            Player player = Main.player[Projectile.owner];
+            float point = 0f;
+            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), player.Center, FakeCenter + player.Center, Projectile.height, ref point);
+        }
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            base.OnHitNPC(target, hit, damageDone);
+            Player player = Main.player[Projectile.owner];
+            if (Projectile.ai[2] == 0)
+            {
+                Projectile.ai[2] = 1;
+                player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge += Projectile.ai[1]; // Change sword gauge by SwordPowerGaugeAdd
+                if (player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge > player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax)
+                    player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGaugeMax;
+                if (player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge < 0)
+                    player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0;
+                player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = (float)Math.Round(player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge, 1);
+            }
         }
         public override bool PreDraw(ref Color lightColor)
         {
+            Player player = Main.player[Projectile.owner];
             List<VertexInfo2> slash = new List<VertexInfo2>();
-            for (int i = 0; i < 4; i++)
+            int iTimer = 1;
+            while (iTimer < PosCache.Length && !(PosCache[iTimer] == Vector2.Zero))
             {
-                int width = 8;
-                switch (i)
+                Vector2 normal = PosCache[iTimer - 1] - PosCache[iTimer];
+                normal = Vector2.Normalize(new Vector2(-normal.Y, normal.X));
+                Vector2 pos = PosCache[iTimer] - Main.screenPosition;
+                float lerptimer = 1f;
+                if (Projectile.timeLeft > CurveTimeleft)
                 {
-                    case 0: width = 6; break;
-                    case 1: width = 7; break;
-                    case 2: width = 8; break;
-                    case 3: width = 0; break;
+                    lerptimer = MeleeRevampMathHelper.expDownLerpHelper(headScale, 1, (float)(iTimer - 1) / (Projectile.ai[0] - 1 - CurveTimeleft), 1.5f);
                 }
-                Vector2 pos = Projectile.Center - Main.screenPosition;
-                slash.Add(new VertexInfo2(pos + new Vector2(-Projectile.width + Projectile.width / 2f * i, -width).RotatedBy(Projectile.rotation), new Vector3(i / 3f, 0.9f, 1), color));
-                slash.Add(new VertexInfo2(pos + new Vector2(-Projectile.width + Projectile.width / 2f * i, width).RotatedBy(Projectile.rotation), new Vector3(i / 3f, 1, 1), color));
+                else
+                {
+                    if (iTimer < (Projectile.ai[0] - CurveTimeleft))
+                        lerptimer = MeleeRevampMathHelper.expDownLerpHelper(headScale, 1, (float)(iTimer - 1) / (Projectile.ai[0] - 1 - CurveTimeleft), 1.5f);
+                    else lerptimer = MeleeRevampMathHelper.expUpLerpHelper(1, bottomScale, (float)(iTimer - (Projectile.ai[0] - 1 - CurveTimeleft)) / (CurveTimeleft - (Projectile.ai[0] / 2)), 3);
+                }
+                if (Projectile.timeLeft <= CurveTimeleft)
+                {
+                    if (Projectile.timeLeft > (Projectile.ai[0] / 2))
+                        lerptimer *= MathHelper.SmoothStep(0.8f, 1f, (Projectile.timeLeft - (Projectile.ai[0] / 2)) / (CurveTimeleft - (Projectile.ai[0] / 2)));
+                    else lerptimer *= MathHelper.Lerp(0f, 0.8f, Projectile.timeLeft / (Projectile.ai[0] / 2));
+                }
+                float height = lerptimer * Projectile.height / 2;
+                float timer = (float)iTimer / PosCache.Length;
+                slash.Add(new VertexInfo2(pos - normal * height * upScale + player.Center, new Vector3(MathHelper.Lerp(0, 1, timer), 0, 1), Color.White));
+                slash.Add(new VertexInfo2(pos + normal * height * downScale + player.Center, new Vector3(MathHelper.Lerp(0, 1, timer), 1, 1), Color.White));
+                iTimer++;
             }
             #region Set up vertex paint
             Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            Effect effect = Filters.Scene["TimeTrail"].GetShader().Shader;
+            effect.Parameters["timer"].SetValue(Projectile.timeLeft * 0.04f);
+            Main.graphics.GraphicsDevice.Textures[0] = ModContent.Request<Texture2D>("MeleeRevamp/Content/Assets/Trail", AssetRequestMode.ImmediateLoad).Value;
+            Main.graphics.GraphicsDevice.Textures[1] = ModContent.Request<Texture2D>(ColorShaderTexture, AssetRequestMode.ImmediateLoad).Value;
+            Main.graphics.GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
+            Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+            effect.CurrentTechnique.Passes[0].Apply();
             if (slash.Count >= 3)
             {
-                Main.graphics.GraphicsDevice.Textures[0] = ModContent.Request<Texture2D>(Texture).Value;
                 Main.graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, slash.ToArray(), 0, slash.Count - 2);
             }
             Main.spriteBatch.End();
@@ -984,38 +1106,14 @@ namespace MeleeRevamp.Content.Projectiles
             #endregion
             return false;
         }
-    }
-    public class GlowDustSword : ModDust
-    {
-        public override string Texture => "MeleeRevamp/Content/Assets/GlowDust";
-        public override void OnSpawn(Dust dust)
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
         {
-            dust.noGravity = true;
-            dust.frame = new Rectangle(0, 0, 64, 64);
-            dust.shader = new Terraria.Graphics.Shaders.ArmorShaderData(new Ref<Effect>(MeleeRevamp.Instance.Assets.Request<Effect>("Effects/GlowDust", AssetRequestMode.ImmediateLoad).Value), "GlowingDust");
+            Main.instance.DrawCacheProjsOverPlayers.Add(index);
         }
-        public override Color? GetAlpha(Dust dust, Color lightColor)
+        public void DrawWarp()
         {
-            return dust.color;
-        }
-        public override bool Update(Dust dust)
-        {
-            dust.scale *= 0.95f;
-            dust.position += dust.velocity;
-            dust.shader.UseColor(dust.color);
-            if (!dust.noGravity)
-                dust.velocity.Y += 0.1f;
-
-            dust.velocity *= 0.99f;
-            dust.color *= 0.95f;
-
-            if (!dust.noLight)
-                Lighting.AddLight(dust.position, dust.color.ToVector3());
-
-            if (dust.scale < 0.05f)
-                dust.active = false;
-
-            return false;
+            Color color = Color.White;
+            PreDraw(ref color);
         }
     }
 }

@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace MeleeRevamp.Content.Core
 {
+    public interface IDrawBloom
+    {         
+        void DrawBloom();
+    }
     public interface IDrawWarp
     {
         void DrawWarp();

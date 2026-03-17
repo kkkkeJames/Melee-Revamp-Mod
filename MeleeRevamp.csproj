@@ -7,11 +7,16 @@
 	<PropertyGroup>
 		
 	</PropertyGroup>
+	<ItemGroup>
+	  <AdditionalFiles Remove="Content\Effects\FlameScroll.fx" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Include="Content\Effects\FlameScroll.fx" />
+	</ItemGroup>
 
 	<!-- References -->
 	<ItemGroup>
 	  <Folder Include="Content\Assets\" />
-	  <Folder Include="Content\Effects\" />
 	  <Folder Include="lib\" />
 	</ItemGroup>
 	<ItemGroup>

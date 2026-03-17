@@ -10,6 +10,35 @@ Mods: {
 
 		// "Keybinds.Switch Melee weapon Alternate Attack Mode.DisplayName": Switch  Melee weapon  Alternate  Attack  Mode
 
+		Items: {
+			BloodButcherer: {
+				Tip1: 长按鼠标右键：将剑意值蓄到满。
+				Tip2: 释放鼠标右键以释放旋转攻击。此攻击会逐渐耗尽所有剑意。
+			}
+
+			BladeOfGrass: {
+				Tip1: 鼠标左，左，然后左，左：一系列刺击，由一击重刺收尾。长按左键以增加刺击次数。
+				Tip2: 鼠标右，右，右，右：一个4段斩击连招，每次攻击消耗0.6剑意值。
+				Tip3: 如果消耗足够剑意值，则发射叶刃。叶刃数量随连续右键攻击次数增加。
+			}
+
+			NightsEdge: {
+				Tip1: 长按鼠标右键以消耗剑意值蓄力。释放鼠标右键以释放冲刺攻击。
+				Tip2: 如果消耗的剑意大于1.2，对其命中的目标释放一系列暗影斩击。
+			}
+
+			TestprojShooter: {
+				// Tooltip: ""
+				// DisplayName: Testproj Shooter
+			}
+
+			Volcano: {
+				Tip1: 长按鼠标邮件以蓄力一次大范围攻击。
+				Tip2: 如果剑意值满，将剑点燃。
+				Tip3: 当剑被点燃时，逐渐清空剑意并增加伤害。
+			}
+		}
+
 		Projectiles: {
 			// BladeOfGrassSlash.DisplayName: Blade Of Grass Slash
 			// BloodButchererSlash.DisplayName: Blood Butcherer Slash
@@ -20,12 +49,18 @@ Mods: {
 			// GrassSlash.DisplayName: Grass Slash
 			// IronBroadSwordSlash.DisplayName: Iron Broad Sword Slash
 			// LeadBroadSwordSlash.DisplayName: Lead Broad Sword Slash
-			// LightsBaneSlash.DisplayName: Lights Bane Slash
+			// NightsEdgeSlash.DisplayName: Nights Edge Slash
 			// PlatinumBroadSwordSlash.DisplayName: Platinum Broad Sword Slash
 			// SilverBroadSwordSlash.DisplayName: Silver Broad Sword Slash
 			// TinBroadSwordSlash.DisplayName: Tin Broad Sword Slash
 			// TungstenBroadSwordSlash.DisplayName: Tungsten Broad Sword Slash
 			// GlobalSwordDrive.DisplayName: Global Sword Drive
+			// SwordFlash.DisplayName: Sword Flash
+			// NOOO.DisplayName: N O O O
+			// SwordTrail.DisplayName: Sword Trail
+			// StabTrail.DisplayName: Stab Trail
+			// MuramasaSlash.DisplayName: Muramasa Slash
+			// FieryGreatswordSlash.DisplayName: Fiery Greatsword Slash
 		}
 
 		Configs: {

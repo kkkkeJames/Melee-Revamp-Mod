@@ -8,8 +8,8 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
-using static MeleeRevamp.Content.Items.VanillaRevamps.BladeOfGrassSlash;
 
 namespace MeleeRevamp.Content.Items.VanillaRevamps
 {
@@ -19,6 +19,24 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
             return entity.type == ItemID.BloodButcherer;
+        }
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            base.ModifyTooltips(item, tooltips);
+            TooltipLine line1 = new(Mod, "STip1", Language.GetTextValue("Mods.MeleeRevamp.Items.BloodButcherer.Tip1")) { OverrideColor = Color.DarkRed * 2f };
+            TooltipLine line2 = new(Mod, "STip2", Language.GetTextValue("Mods.MeleeRevamp.Items.BloodButcherer.Tip2")) { OverrideColor = Color.DarkRed * 2f };
+
+            int insertIndex = tooltips.FindLastIndex(t => t.Name != "CreativeSacrificeNeeded");
+            if (insertIndex != -1)
+            {
+                tooltips.Insert(insertIndex, line1);
+                tooltips.Insert(insertIndex + 1, line2);
+            }
+            else
+            {
+                tooltips.Add(line1);
+                tooltips.Add(line2);
+            }
         }
         public override void SetDefaults(Item item)
         {
@@ -60,6 +78,8 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
         {
             base.Initialize();
             RegisterState(new LeftAltCombo1());
+            RegisterState(new AltAttackCharge());
+            RegisterState(new AltAttack());
         }
         public override void AIBefore()
         {
@@ -79,6 +99,10 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((BloodButchererSlash)Projectile.ModProjectile).SetState<LeftAltCombo1>(true, 2.6f, 0.7f, -2.6f, 2.4f, 0.6f, 0.2f, true, 12f, true, true, 0f, 2f);
                         break;
                 }
+            }
+            if (RightClick)
+            {
+                ((BloodButchererSlash)Projectile.ModProjectile).SetState<AltAttackCharge>();
             }
         }
         // The last normal attack is a modified version of normal wield, mostly copied from the orig implementation
@@ -103,6 +127,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 int HoldupTimeMax = 24; // The time player hold up the sword, which is 6f in this case
                 int FullHoldupTimeMax = (int)projmod.TimeMax / 2;
                 int WieldTimeMax = (int)projmod.TimeMax - HoldupTimeMax; // The time player wield the sword
+                proj.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
                 if (projmod.WieldStuckTimer > 0) // Modify stuck frames
                     projmod.WieldStuckTimer--;
                 else projmod.Timer++;
@@ -132,12 +157,12 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                     proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, projmod.Projectile.rotation - (projmod.ShouldCountMouse ? (float)Math.Atan(projmod.MousePos.Y / projmod.MousePos.X) : 0)); // Change sword's scale
                     projmod.WieldDrawRadius[WieldTimer] = projmod.SwordRadius;
                     #endregion
-                    #region Switch states
-                    if (projmod.Timer >= projmod.TimeMax)
-                    {
-                        SwitchState(projectile);
-                    }
-                    #endregion
+                }
+                #endregion
+                #region Switch states
+                if (projmod.Timer >= projmod.TimeMax)
+                {
+                    SwitchState(projectile);
                 }
                 #endregion
             }
@@ -146,35 +171,27 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 base.SwitchState(projectile);
             }
         }
-    }
-}
-/*
-        public void AlternateAttackTrigger()
-        {
-            Player player = Main.player[Projectile.owner];
-            Timer = 0;
-            if (!DrawSword)
-            {
-                DrawSword = true;
-                ApplyDissolve = true;
-            }
-            IniSet.Set(ArmToSwordOffset, Projectile.rotation, ArmRotation, Projectile.scale); 
-            TargetSet.Set(new Vector2(-12, 0).RotatedBy(player.direction == 1 ? -(float)Math.PI : 0), player.direction == 1 ? -(float)Math.PI : 0, player.direction == 1 ? -(float)Math.PI * 3 / 2 : (float)Math.PI * 3 / 2, 2.4f);
-            ((BloodButchererSlash)Projectile.ModProjectile).SetState<AlternateAttack>();
-        }
-        private class AlternateAttack : ProjectileState
+        private class AltAttackCharge : ProjectileState
         {
             public bool Charging = true;
             public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
             {
-                throw new NotImplementedException();
+                Projectile proj = projectile.Projectile;
+                BloodButchererSlash projmod = (BloodButchererSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                if (!projmod.DrawSword)
+                {
+                    projmod.DrawSword = true;
+                    projmod.ApplyDissolve = true;
+                }
+                projmod.TargetStruct1.SetStruct(new Vector2(-12, 0).RotatedBy(player.direction == 1 ? -(float)Math.PI : 0), player.direction == 1 ? -(float)Math.PI : 0, player.direction == 1 ? -(float)Math.PI * 3 / 2 : (float)Math.PI * 3 / 2, 2.4f);
             }
             public override void AI(ProjectileStateMachine projectile)
             {
                 #region Basic Settings
                 Projectile proj = projectile.Projectile;
                 BloodButchererSlash projmod = (BloodButchererSlash)proj.ModProjectile;
-                Player player = Main.player[proj.owner]; 
+                Player player = Main.player[proj.owner];
                 #endregion
                 #region State data
                 if (projmod.Timer == 0)
@@ -189,7 +206,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 }
                 projmod.WieldAttack = false;
                 projmod.ShouldDrawArm = true;
-                projmod.DrawInverse = player.direction < 0;
+                projmod.FlipSwordTexture = player.direction < 0;
                 player.itemTime = player.itemAnimation = 2;
                 if (Main.mouseRight && !Main.mouseRightRelease)
                     Charging = true;
@@ -198,66 +215,62 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 #endregion
                 #region Arm change
                 if (projmod.Timer <= 120)
-                {
-                    projmod.TransferToSet(proj, projmod.TargetSet, (projmod.Timer - 30) / 90f, true, true);
-                }
+                    projmod.LerpSwordStruct(proj, projmod.TargetStruct1, (projmod.Timer - 30) / 90f, true, true);
                 else projmod.ChargeShader = true;
                 #endregion
-                if (!Charging)
+                if (!Charging && projmod.Timer > 120 || projmod.Timer > 720)
                 {
-                    #region Stop charging
-                    if (projmod.Timer > 120)
-                    {
-                        projmod.ChargeShader = false;
-                        projmod.TimeMax = player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge * 600; 
-                        projmod.Timer = 0; 
-                        projmod.SetState<AlternateAttack2>(); 
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region Stop charging after 12s
-                    if (projmod.Timer > 720)
-                    {
-                        projmod.ChargeShader = false;
-                        projmod.Timer = 0; 
-                        projmod.TimeMax = player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge * 600;
-                        projmod.SetState<AlternateAttack2>(); 
-                    }
-                    #endregion
+                    SwitchState(projectile);
                 }
             }
-        }
-        private class AlternateAttack2 : ProjectileState
-        {
-            public bool Charging = true;
-            public int ChargeDirection = 1;
-            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+
+            public override void SwitchState(ProjectileStateMachine projectile)
             {
-                throw new NotImplementedException();
-            }
-            public override void AI(ProjectileStateMachine projectile)
-            {
-                #region Basic setting
                 Projectile proj = projectile.Projectile;
                 BloodButchererSlash projmod = (BloodButchererSlash)proj.ModProjectile;
                 Player player = Main.player[proj.owner];
-                player.GetModPlayer<BBSpecialPlayer>().BBSpecial = true;
-                proj.localNPCHitCooldown = 8;
-                projmod.WieldStandardScale = 2.4f;
-                projmod.WieldThinScale = 0.4f;
-                projmod.WieldHandleLength = 12;
-                projmod.DamageScale = 0.2f;
-                projmod.ShouldDrawArm = true; 
-                player.itemAnimation = player.itemTime = 2; 
-                if (projmod.Timer == 0) ChargeDirection = player.direction;
-                projmod.Timer++; 
+                projmod.ChargeShader = false;
+                projmod.SetState<AltAttack>(false, 2.4f, 0.4f, 0f, 0f, 0f, 0f, true, 10f);
+            }
+        }
+        private class AltAttack : Wield
+        {
+            public int startDirection = 1;
+            public override void TriggerAI(ProjectileStateMachine projectile, params object[] args)
+            {
+                base.TriggerAI(projectile, args);
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                projmod.TimeMax = player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge * 600;
+            }
+            public override void AI(ProjectileStateMachine projectile)
+            {
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                proj.localNPCHitCooldown = 18;
+                projmod.ShouldDrawArm = true;
+                player.itemAnimation = player.itemTime = 2;
+                projmod.Timer++;
                 projmod.SlashDrawTimer = projmod.Timer;
-                #endregion
-                #region Spin attack
+                projmod.ApplyDissolve = false;
                 projmod.WieldAttack = true;
                 projmod.CouldHit = true;
+                proj.rotation += 0.18f * startDirection;
+                while (proj.rotation > Math.PI * 2) proj.rotation -= (float)Math.PI * 2;
+                while (proj.rotation < -Math.PI * 2) proj.rotation += (float)Math.PI * 2;
+                projmod.ArmToSwordOffset = new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(proj.rotation);
+                proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(WieldStandardScale, WieldStandardScale * WieldThinScale, projmod.Projectile.rotation); // Change sword's scale
+                projmod.ArmRotation = proj.rotation - (float)Math.PI / 2;
+                projmod.WieldDrawRadius[projmod.Timer] = projmod.SwordRadius;
+                if (proj.rotation > -Math.PI / 2 && proj.rotation < Math.PI / 2) player.direction = 1;
+                else player.direction = -1;
+                if (projmod.Timer >= projmod.TimeMax)
+                {
+                    SwitchState(projectile);
+                }
+                
                 if (projmod.Timer % 60 == 1)
                 {
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge -= 0.1f;
@@ -265,45 +278,17 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0;
                     player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = (float)Math.Round(player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge, 1);
                 }
-                #region Angle change
-                if (projmod.TimeMax - projmod.Timer > 20) proj.rotation += 0.2f * ChargeDirection;
-                else proj.rotation += MathHelper.Lerp(0, 0.2f, (projmod.TimeMax - projmod.Timer) / 20f) * ChargeDirection;
-                while (proj.rotation > Math.PI * 2) proj.rotation -= (float)Math.PI * 2;
-                while (proj.rotation < -Math.PI * 2) proj.rotation += (float)Math.PI * 2;
-                projmod.ArmToSwordOffset = new Vector2(-projmod.WieldHandleLength, 0).RotatedBy(proj.rotation);
-                proj.scale = MeleeRevampMathHelper.EllipseRadiusHelper(projmod.WieldStandardScale, projmod.WieldStandardScale * projmod.WieldThinScale, projmod.Projectile.rotation);
-                projmod.ArmRotation = projmod.ArmRotation = proj.rotation - (float)Math.PI / 2;
-                projmod.WieldDrawRadius[projmod.Timer] = projmod.SwordRadius; 
-                if (proj.rotation > -Math.PI / 2 && proj.rotation < Math.PI / 2) player.direction = 1;
-                else player.direction = -1;
-                #endregion
-                #region State machine
-                if (projmod.Timer >= projmod.TimeMax) 
-                {
-                    player.GetModPlayer<MeleeRevampPlayer>().SwordPowerGauge = 0;
-                    player.GetModPlayer<BBSpecialPlayer>().BBSpecial = false;
-                    proj.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
-                    projmod.IniSet.Set(projmod.ArmToSwordOffset, proj.rotation, projmod.ArmRotation, proj.scale); 
-                    projmod.TargetSet.Set(new Vector2(0, 0), player.direction > 0 ? 0.1f * (float)Math.PI : 0.9f * (float)Math.PI, 0, 1.6f);
-                    projmod.Timer = 0;
-                    projmod.TimeMax = 240; 
-                    projmod.SetState<Recover>(); 
-                    return;
-                }
-                #endregion
-                #endregion
+            }
+
+            public override void SwitchState(ProjectileStateMachine projectile)
+            {
+                base.SwitchState(projectile);
+                Projectile proj = projectile.Projectile;
+                GlobalSwordSlash projmod = (GlobalSwordSlash)proj.ModProjectile;
+                Player player = Main.player[proj.owner];
+                projmod.CouldHit = false;
+                proj.localNPCHitCooldown = (int)(player.HeldItem.useTime / player.GetAttackSpeed(DamageClass.Melee)) * 4;
             }
         }
     }
-    public class BBSpecialPlayer : ModPlayer
-    {
-        public bool BBSpecial = false;
-        public override void OnHurt(Player.HurtInfo info)
-        {
-            if (BBSpecial) info.Damage = (int)(info.Damage * 0.75f);
-            base.OnHurt(info);
-        }
-    }
 }
-
- */

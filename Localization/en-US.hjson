@@ -10,6 +10,35 @@ Mods: {
 
 		"Keybinds.Switch Melee weapon Alternate Attack Mode.DisplayName": Switch  Melee weapon  Alternate  Attack  Mode
 
+		Items: {
+			BloodButcherer: {
+				Tip1: Hold mouse R: charge sword power gauge to max.
+				Tip2: Release mouse R to perform a spin attack. This attack continuously consume all sword power.
+			}
+
+			BladeOfGrass: {
+				Tip1: Mouse L,L, then L,L: a flush of stabs, finished by a heavy one. Hold L to increase number of stabs.
+				Tip2: Mouse R,R,R,R: a 4-slash combo attack, cost 0.6 sword power for each attack.
+				Tip3: If sword power is sufficient, fires leaf blades. Number of leaf blades increases by the number of consecutive right click attacks.
+			}
+
+			NightsEdge: {
+				Tip1: Hold mouse R to consume sword power to charge up. Release mouse R to perform a lunge attack
+				Tip2: If sword power consumed reaches 1.2, release a flurry of shadow slashes to the target it hit.
+			}
+
+			TestprojShooter: {
+				Tooltip: ""
+				DisplayName: Testproj Shooter
+			}
+
+			Volcano: {
+				Tip1: Hold mouse R to charge a wide range slash attack.
+				Tip2: If sword power is full, ignite the sword.
+				Tip3: While sword is ignited, gradually depletes sword power until empty and increases damage.
+			}
+		}
+
 		Projectiles: {
 			BladeOfGrassSlash.DisplayName: Blade Of Grass Slash
 			BloodButchererSlash.DisplayName: Blood Butcherer Slash
@@ -20,12 +49,18 @@ Mods: {
 			GrassSlash.DisplayName: Grass Slash
 			IronBroadSwordSlash.DisplayName: Iron Broad Sword Slash
 			LeadBroadSwordSlash.DisplayName: Lead Broad Sword Slash
-			LightsBaneSlash.DisplayName: Lights Bane Slash
+			NightsEdgeSlash.DisplayName: Nights Edge Slash
 			PlatinumBroadSwordSlash.DisplayName: Platinum Broad Sword Slash
 			SilverBroadSwordSlash.DisplayName: Silver Broad Sword Slash
 			TinBroadSwordSlash.DisplayName: Tin Broad Sword Slash
 			TungstenBroadSwordSlash.DisplayName: Tungsten Broad Sword Slash
 			GlobalSwordDrive.DisplayName: Global Sword Drive
+			SwordFlash.DisplayName: Sword Flash
+			NOOO.DisplayName: N O O O
+			SwordTrail.DisplayName: Sword Trail
+			StabTrail.DisplayName: Stab Trail
+			MuramasaSlash.DisplayName: Muramasa Slash
+			FieryGreatswordSlash.DisplayName: Fiery Greatsword Slash
 		}
 
 		Configs: {

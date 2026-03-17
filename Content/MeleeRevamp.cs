@@ -1,10 +1,13 @@
 using MeleeRevamp.Content.Core;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
+using Terraria.Graphics;
 using Terraria.ModLoader;
 
 namespace MeleeRevamp.Content
@@ -62,6 +65,24 @@ namespace MeleeRevamp.Content
             var UIProgress_set_SubProgressText = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UIProgress")!.GetProperty("SubProgressText", BindingFlags.Public | BindingFlags.Instance)!.GetSetMethod()!;
 
             UIProgress_set_SubProgressText.Invoke(Interface_loadMods.GetValue(null), new object[] { text });
+        }
+    }
+    public class MeleeRevampSystem : ModSystem
+    {
+        public override void ModifyTransformMatrix(ref SpriteViewMatrix Transform)
+        {
+            if (Main.gameMenu || MeleeRevampConfigClient.Instance.CameraLockDisable)
+                return;
+
+            MeleeRevampScreenPlayer screenPlayer = Main.LocalPlayer.GetModPlayer<MeleeRevampScreenPlayer>();
+            if (screenPlayer.ZoomTimeMax > 0 && screenPlayer.ZoomVector != Vector2.Zero)
+            {
+                float lerper = MeleeRevampMathHelper.expDownLerpHelper(0, 1, screenPlayer.ZoomTime / screenPlayer.ZoomTimeMax);
+                if (!screenPlayer.ZoomReverse)
+                    Transform.Zoom = Vector2.Lerp(new Vector2(Main.GameViewMatrix.Zoom.X), screenPlayer.ZoomVector, lerper);
+                else
+                    Transform.Zoom = Vector2.Lerp(screenPlayer.ZoomVector, new Vector2(Main.GameViewMatrix.Zoom.X), lerper);
+            }
         }
     }
 }

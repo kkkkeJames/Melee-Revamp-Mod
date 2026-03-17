@@ -30,5 +30,17 @@ namespace MeleeRevamp.Content
         {
             return (float)(a / (1 + (a / b - 1) * Math.Pow(Math.E, pow * x)) - red);
         }
+        public static float expUpLerpHelper (float a, float b, float lerp, float exp)
+        {
+            return MathHelper.Lerp(a, b, (float)Math.Pow(lerp, exp));
+        }
+        public static float expDownLerpHelper(float a, float b, float lerp, float exp = 2)
+        {
+            return MathHelper.Lerp(a, b, 1 - (float)Math.Pow((1 - lerp), exp));
+        }
+        public static Color LerpColor (Color a, Color b, float lerp)
+        {
+            return new Color(MathHelper.Lerp(a.R, b.R, lerp)/255f, MathHelper.Lerp(a.G, b.G, lerp)/255f, MathHelper.Lerp(a.B, b.B, lerp)/255f, MathHelper.Lerp(a.A, b.A, lerp)/255f);
+        }
     }
 }

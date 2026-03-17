@@ -64,7 +64,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((CopperBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -126,7 +126,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((TinBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -188,7 +188,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((IronBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -250,7 +250,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((LeadBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -312,7 +312,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((SilverBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -374,7 +374,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((TungstenBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -436,7 +436,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((GoldBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }
@@ -498,7 +498,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((PlatinumBroadSwordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }

@@ -107,7 +107,7 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                         ((DefaultBroadswordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.8f, 1.8f, -1.7f, 0.2f, 0f, true, 6f);
                         break;
                     case 2:
-                        ((DefaultBroadswordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0f, 1.2f);
+                        ((DefaultBroadswordSlash)Projectile.ModProjectile).SetState<Wield>(true, 2f, 0.7f, -2.5f, 2.3f, 0.4f, 0.2f, true, 6f, true, true, 0, 1.2f);
                         break;
                 }
             }

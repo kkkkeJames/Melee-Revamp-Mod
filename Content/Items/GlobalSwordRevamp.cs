@@ -28,12 +28,12 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
             TooltipLine line2 = new(Mod, "Tip2", Language.GetTextValue("Mods.MeleeRevamp.GenericTooltips.Broadswords.Tip2")) { OverrideColor = Color.Gold };
             TooltipLine line3 = new(Mod, "Tip3", Language.GetTextValue("Mods.MeleeRevamp.GenericTooltips.Broadswords.Tip3")) { OverrideColor = Color.Gold };
 
-            int insertIndex = tooltips.FindIndex(t => t.Name == "Tooltip0");
+            int insertIndex = tooltips.FindLastIndex(t => t.Name != "CreativeSacrificeNeeded");
             if (insertIndex != -1)
             {
-                tooltips.Insert(insertIndex + 1, line1);
-                tooltips.Insert(insertIndex + 2, line2);
-                tooltips.Insert(insertIndex + 3, line3);
+                tooltips.Insert(insertIndex, line1);
+                tooltips.Insert(insertIndex + 1, line2);
+                tooltips.Insert(insertIndex + 2, line3);
             }
             else
             {
@@ -41,6 +41,12 @@ namespace MeleeRevamp.Content.Items.VanillaRevamps
                 tooltips.Add(line2);
                 tooltips.Add(line3);
             }
+        }
+        public override void SetDefaults(Item entity)
+        {
+            entity.noUseGraphic = true;
+            entity.noMelee = true;
+            entity.useStyle = ItemUseStyleID.Shoot;
         }
         public override bool CanUseItem(Item item, Player player)
         {
