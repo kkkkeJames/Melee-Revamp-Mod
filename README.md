@@ -10,7 +10,7 @@ Due to compatibility issue, True Night's Edge and Terra Blade will be reworked i
 ## Project Technical Structure / 项目技术架构
 
 ### 1. Multi-pass Render Pipeline | 多层级渲染管线
-* Developed a custom post-processing framework by hooking the XNA/FNA render graphics device. Implemented a linear rendering workflow: `Scene Capture -> Off-screen Buffer -> Post-processing Injection -> Final Composite`.
+* Developed a custom post-processing framework by hooking the XNA/FNA render graphics device. Implemented a linear rendering workflow from scene capture to off-screen butter to post-processing injection and final composition. 
 * 通过 Hook 拦截原引擎渲染端点，基于 RenderTarget2D 的完整的后处理管线。实现了从场景采集、离屏特效注入到最终合成的线性渲染流程。
 
 ### 2. GPU-Driven VFX System | GPU 驱动视觉特效系统
